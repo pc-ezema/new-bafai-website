@@ -1,0 +1,404 @@
+/* ============================================
+   VIBRANT PROFESSIONAL STYLING - BAFAI ABOUT
+   Font sizes aligned with index page
+   ============================================ */
+
+:root {
+    --primary: #503a98;
+    --primary-rgb: 80, 58, 152;
+    --primary-dark: #3b2a73;
+    --primary-light: #7c5fcf;
+    --secondary: #21a37a;
+    --secondary-rgb: 33, 163, 122;
+    --secondary-dark: #1a7d5e;
+    --dark: #0f172a;
+    --dark-soft: #1e293b;
+    --gray: #64748b;
+    --gray-light: #f8fafc;
+    --white: #ffffff;
+    --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+    --radius: 1rem;
+    --radius-lg: 1.5rem;
+    --radius-xl: 2rem;
+}
+
+/* ===== BREADCRUMB ===== */
+.breadcrumb-bar {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(80, 58, 152, 0.85)), url('../img/bafai-8.jpg') no-repeat;
+    background-size: cover;
+    background-position: center 30%;
+    background-attachment: fixed;
+    padding: 100px 0;
+    position: relative;
+    color: white;
+    clip-path: polygon(0 0, 100% 0, 100% 90%, 0 100%);
+}
+
+.breadcrumb-bar .breadcrumb-title {
+    color: white;
+    font-size: 3rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    animation: fadeInUp 0.8s ease;
+}
+
+.breadcrumb-bar .breadcrumb {
+    background: transparent;
+}
+.breadcrumb-bar .breadcrumb-item a,
+.breadcrumb-bar .breadcrumb-item.active {
+    color: white !important;
+    opacity: 0.9;
+    font-size: 0.9rem;
+}
+.breadcrumb-bar .breadcrumb-item a:hover {
+    color: var(--secondary) !important;
+    opacity: 1;
+}
+.breadcrumb-bar .breadcrumb-item + .breadcrumb-item::before {
+    color: white !important;
+    opacity: 0.7;
+    content: "/";
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== SECTION HEADERS (matches index) ===== */
+.section-header {
+    margin-bottom: 3rem;
+    text-align: center;
+}
+.section-header h2 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    display: inline-block;
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+}
+.section-header p {
+    color: var(--gray);
+    max-width: 700px;
+    margin: 0 auto;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+/* ===== WHO WE ARE ===== */
+.who-we-are {
+    padding: 100px 0;
+    background: linear-gradient(135deg, #ffffff 0%, #f5f3ff 100%);
+}
+.about-image-wrapper {
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: var(--shadow-xl);
+    transition: all 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+}
+.about-image-wrapper:hover {
+    transform: scale(1.02) rotate(1deg);
+}
+.about-image-wrapper img {
+    width: 100%;
+    height: auto;
+    transition: transform 0.7s ease;
+}
+.about-image-wrapper:hover img {
+    transform: scale(1.05);
+}
+.who-we-are p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--dark-soft);
+}
+
+/* ===== ABOUT PROGRAM ===== */
+.about-program {
+    padding: 100px 0;
+    background: linear-gradient(135deg, #f1f5f9 0%, #e6f0fa 100%);
+}
+.program-highlight {
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid rgba(80,58,152,0.2);
+    transition: transform 0.3s;
+}
+.program-highlight:hover {
+    transform: translateY(-5px);
+}
+.program-highlight p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+.program-highlight ul {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0;
+}
+.program-highlight ul li {
+    margin-bottom: 0.75rem;
+    padding-left: 1.8rem;
+    position: relative;
+    font-size: 0.9rem;
+    color: var(--gray);
+    transition: transform 0.2s;
+}
+.program-highlight ul li:hover {
+    transform: translateX(8px);
+    color: var(--primary);
+}
+.program-highlight ul li::before {
+    content: "✨";
+    position: absolute;
+    left: 0;
+    color: var(--secondary);
+}
+
+/* ===== WHY BAFAI ===== */
+.why-bafai {
+    padding: 100px 0;
+    background: #ffffff;
+}
+.benefit-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+.benefit-card {
+    background: #ffffff;
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    text-align: center;
+    transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    box-shadow: var(--shadow-md);
+    border: 1px solid rgba(80,58,152,0.15);
+}
+.benefit-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-xl);
+    background: linear-gradient(135deg, #ffffff, #faf5ff);
+    border-color: var(--primary);
+}
+.benefit-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, rgba(80,58,152,0.15), rgba(33,163,122,0.15));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.2rem;
+    color: var(--primary);
+    font-size: 1.8rem;
+    transition: all 0.3s;
+}
+.benefit-card:hover .benefit-icon {
+    transform: scale(1.1) rotate(5deg);
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+}
+.benefit-card h4 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+}
+.benefit-card p {
+    font-size: 0.85rem;
+    color: var(--gray);
+    line-height: 1.5;
+}
+
+/* ===== STATS SECTION ===== */
+.stats-section {
+    padding: 100px 0;
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    position: relative;
+    overflow: hidden;
+}
+.stats-section::before {
+    content: '';
+    position: absolute;
+    top: -30%;
+    left: -10%;
+    width: 120%;
+    height: 160%;
+    background: radial-gradient(circle, rgba(80,58,152,0.3), transparent 70%);
+    animation: slowDrift 25s infinite linear;
+}
+@keyframes slowDrift {
+    0% { transform: translate(0,0) rotate(0deg); }
+    100% { transform: translate(5%,5%) rotate(5deg); }
+}
+.stats-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    gap: 2rem;
+    position: relative;
+    z-index: 2;
+}
+.stat-item {
+    text-align: center;
+    flex: 1;
+    min-width: 180px;
+    padding: 1.8rem;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255,255,255,0.15);
+    transition: all 0.4s ease;
+}
+.stat-item:hover {
+    transform: translateY(-8px);
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--secondary);
+}
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 1rem;
+}
+.stat-icon img {
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+}
+.stat-number {
+    font-size: 2.2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #ffd89b, #ffb347);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
+}
+.stat-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: rgba(255,255,255,0.9);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ===== TARGET AUDIENCE ===== */
+.target-audience {
+    padding: 100px 0;
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+    color: white;
+}
+.target-audience .section-header h2 {
+    background: linear-gradient(135deg, #ffffff, #c4b5fd);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+.target-audience .section-header p {
+    color: rgba(255,255,255,0.9);
+}
+.audience-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.8rem;
+    margin-top: 2rem;
+}
+.audience-item {
+    background: rgba(255, 255, 255, 0.98);
+    padding: 1.8rem 1.2rem;
+    border-radius: var(--radius);
+    text-align: center;
+    transition: all 0.4s ease;
+    box-shadow: var(--shadow-sm);
+    border-bottom: 3px solid var(--secondary);
+}
+.audience-item:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-lg);
+}
+.audience-icon {
+    font-size: 2rem;
+    color: var(--primary);
+    margin-bottom: 1rem;
+    transition: transform 0.3s;
+}
+.audience-item:hover .audience-icon {
+    transform: scale(1.1);
+    color: var(--secondary);
+}
+.audience-item h5 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--dark);
+}
+.audience-item p {
+    font-size: 0.8rem;
+    color: var(--gray);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* ===== BUTTON ===== */
+.btn-primary-custom {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    border: none;
+    padding: 0.7rem 2rem;
+    border-radius: 2.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-block;
+    text-align: center;
+    font-size: 0.9rem;
+    box-shadow: var(--shadow-sm);
+}
+.btn-primary-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+    color: white;
+}
+
+/* ===== RESPONSIVE (matches index breakpoints) ===== */
+@media (max-width: 991px) {
+    .breadcrumb-bar { padding: 100px 0; }
+    .breadcrumb-bar .breadcrumb-title { font-size: 2.5rem; }
+    .section-header h2 { font-size: 1.8rem; }
+    .benefit-grid, .audience-grid { grid-template-columns: repeat(2, 1fr); }
+    .stats-grid { gap: 1rem; }
+    .stat-item { min-width: 150px; padding: 1.2rem; }
+    .stat-number { font-size: 1.8rem; }
+}
+
+@media (max-width: 768px) {
+    .breadcrumb-bar { padding: 100px 0; clip-path: polygon(0 0, 100% 0, 100% 95%, 0 100%); }
+    .breadcrumb-bar .breadcrumb-title { font-size: 2rem; }
+    .section-header h2 { font-size: 1.6rem; }
+    .who-we-are, .about-program, .why-bafai, .stats-section, .target-audience { padding: 50px 0; }
+    .benefit-grid, .audience-grid { grid-template-columns: 1fr; }
+    .program-highlight { padding: 1.5rem; }
+    .stats-grid { flex-direction: column; align-items: center; }
+    .stat-item { width: 80%; }
+}
+
+@media (max-width: 576px) {
+    .breadcrumb-bar .breadcrumb-title { font-size: 1.6rem; }
+    .section-header h2 { font-size: 1.4rem; }
+    .section-header p { font-size: 0.9rem; }
+    .stat-item { width: 100%; }
+    .stat-number { font-size: 1.6rem; }
+    .benefit-icon { width: 60px; height: 60px; font-size: 1.5rem; }
+}

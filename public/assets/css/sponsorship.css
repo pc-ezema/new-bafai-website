@@ -1,0 +1,348 @@
+/* ============================================
+   SPONSORSHIP PAGE - BAFAI STYLING
+   ============================================ */
+
+:root {
+    --primary: #503a98;
+    --primary-dark: #3b2a73;
+    --secondary: #21a37a;
+    --dark: #0f172a;
+    --gray: #64748b;
+    --gray-light: #f1f5f9;
+    --white: #ffffff;
+    --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+    --radius: 1rem;
+    --radius-lg: 1.5rem;
+}
+
+body {
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+/* Breadcrumb */
+.breadcrumb-bar {
+    background:
+        linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(80, 58, 152, 0.85)),
+        url("../img/bafai-8.jpg") no-repeat;
+    background-size: cover;
+    background-position: center 30%;
+    background-attachment: fixed;
+    padding: 100px 0;
+    color: white;
+    clip-path: polygon(0 0, 100% 0, 100% 90%, 0 100%);
+}
+
+.breadcrumb-bar .breadcrumb-title {
+    font-size: 3rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+    animation: fadeInUp 0.8s ease;
+}
+
+.breadcrumb-bar .breadcrumb-item a,
+.breadcrumb-bar .breadcrumb-item.active {
+    color: white !important;
+    font-size: 0.9rem;
+}
+
+.breadcrumb-bar .breadcrumb-item a:hover {
+    color: var(--secondary) !important;
+}
+
+.breadcrumb-bar .breadcrumb-item + .breadcrumb-item::before {
+    color: white !important;
+    content: "/";
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Hero / Mission */
+.sponsorship-mission {
+    padding: 100px 0 40px;
+    background: var(--white);
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.section-header h2 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+
+.section-header p {
+    color: var(--gray);
+    font-size: 1rem;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.mission-text {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--dark-soft);
+}
+
+/* Trusted sponsors logo strip */
+.sponsor-logos {
+    padding: 40px 0;
+    background: var(--gray-light);
+}
+
+.logo-strip {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 2.5rem;
+}
+
+.logo-strip img {
+    max-height: 55px;
+    width: auto;
+    filter: grayscale(0.2);
+    opacity: 0.8;
+    transition: all 0.3s;
+}
+
+.logo-strip img:hover {
+    filter: grayscale(0);
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+/* Why Sponsor Cards */
+.why-sponsor {
+    padding: 100px 0;
+    background: var(--white);
+}
+
+.benefit-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.benefit-card {
+    background: var(--gray-light);
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    text-align: center;
+    transition: all 0.3s;
+    box-shadow: var(--shadow-sm);
+}
+
+.benefit-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-lg);
+    background: white;
+}
+
+.benefit-icon {
+    width: 70px;
+    height: 70px;
+    background: rgba(80, 58, 152, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.2rem;
+    color: var(--primary);
+    font-size: 1.8rem;
+}
+
+.benefit-card h4 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+}
+
+.benefit-card p {
+    font-size: 0.9rem;
+    color: var(--gray);
+    line-height: 1.5;
+}
+
+/* Forms Section */
+.forms-section {
+    padding: 100px 0;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.form-tabs {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
+.form-tab-btn {
+    background: var(--white);
+    border: 2px solid var(--primary);
+    padding: 0.8rem 2rem;
+    border-radius: 2.5rem;
+    font-weight: 600;
+    color: var(--primary);
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.form-tab-btn.active {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border-color: transparent;
+}
+
+.form-container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    box-shadow: var(--shadow-md);
+}
+
+.form-container h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
+
+.form-container .form-label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.form-container .form-control {
+    border-radius: var(--radius);
+    padding: 0.75rem 1rem;
+    border: 1px solid #e2e8f0;
+}
+
+.form-container .form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(80, 58, 152, 0.1);
+}
+
+.form-container textarea {
+    min-height: 120px;
+}
+
+.form-check-input:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-submit {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    padding: 0.8rem 2rem;
+    border-radius: 2.5rem;
+    font-weight: 600;
+    border: none;
+    transition: all 0.3s;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Hide form by default */
+.sponsor-form,
+.student-form {
+    display: none;
+}
+
+.sponsor-form.active-form,
+.student-form.active-form {
+    display: block;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .breadcrumb-bar {
+        padding: 100px 0;
+        clip-path: polygon(0 0, 100% 0, 100% 95%, 0 100%);
+    }
+
+    .breadcrumb-bar .breadcrumb-title {
+        font-size: 2rem;
+    }
+
+    .section-header h2 {
+        font-size: 1.8rem;
+    }
+
+    .sponsorship-mission,
+    .why-sponsor,
+    .forms-section {
+        padding: 60px 0;
+    }
+
+    .form-tab-btn {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
+    }
+
+    .form-container {
+        padding: 1.5rem;
+        margin: 0 1rem;
+    }
+
+    .logo-strip img {
+        max-height: 40px;
+    }
+}
+
+@media (max-width: 576px) {
+    .breadcrumb-bar .breadcrumb-title {
+        font-size: 1.6rem;
+    }
+
+    .form-tabs {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .form-tab-btn {
+        width: 80%;
+        text-align: center;
+    }
+}
+
+/* Form visibility */
+.form-container {
+    display: none;
+}
+
+.form-container.active-form {
+    display: block;
+}

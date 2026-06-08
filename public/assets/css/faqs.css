@@ -1,0 +1,217 @@
+/* ============================================
+   FAQ PAGE - BAFAI STYLING
+   Vertical tabs + accordion
+   ============================================ */
+
+:root {
+    --primary: #503a98;
+    --primary-rgb: 80, 58, 152;
+    --primary-dark: #3b2a73;
+    --secondary: #21a37a;
+    --dark: #0f172a;
+    --gray: #64748b;
+    --gray-light: #f1f5f9;
+    --white: #ffffff;
+    --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    --radius: 1rem;
+    --radius-lg: 1.5rem;
+}
+
+body {
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+/* ===== BREADCRUMB ===== */
+.breadcrumb-bar {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(80, 58, 152, 0.85)), url('../img/bafai-8.jpg') no-repeat;
+    background-size: cover;
+    background-position: center 30%;
+    background-attachment: fixed;
+    padding: 100px 0;
+    color: white;
+    clip-path: polygon(0 0, 100% 0, 100% 90%, 0 100%);
+}
+
+.breadcrumb-bar .breadcrumb-title {
+    font-size: 3rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+    animation: fadeInUp 0.8s ease;
+}
+
+.breadcrumb-bar .breadcrumb-item a,
+.breadcrumb-bar .breadcrumb-item.active {
+    color: white !important;
+    font-size: 0.9rem;
+}
+.breadcrumb-bar .breadcrumb-item a:hover {
+    color: var(--secondary) !important;
+}
+.breadcrumb-bar .breadcrumb-item + .breadcrumb-item::before {
+    color: white !important;
+    content: "/";
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== FAQ SECTION ===== */
+.faq-page {
+    padding: 100px 0;
+    background: var(--gray-light);
+}
+
+/* Vertical tabs (left side) */
+.nav-pills-custom {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-md);
+}
+
+.nav-pills-custom .nav-link {
+    color: var(--dark);
+    font-weight: 600;
+    padding: 0.9rem 1.2rem;
+    border-radius: var(--radius);
+    margin-bottom: 0.75rem;
+    transition: all 0.3s;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.nav-pills-custom .nav-link i {
+    width: 24px;
+    color: var(--primary);
+    font-size: 1.1rem;
+}
+
+.nav-pills-custom .nav-link:hover {
+    background: rgba(80, 58, 152, 0.08);
+    transform: translateX(5px);
+}
+
+.nav-pills-custom .nav-link.active {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.nav-pills-custom .nav-link.active i {
+    color: white;
+}
+
+/* Right side accordion */
+.faq-accordion-wrapper {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-md);
+    min-height: 500px;
+}
+
+.accordion-faq .accordion-item {
+    border: none;
+    margin-bottom: 1rem;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.accordion-faq .accordion-button {
+    background: var(--white);
+    font-weight: 600;
+    padding: 1.2rem;
+    font-size: 1rem;
+    color: var(--dark);
+    box-shadow: none;
+}
+
+.accordion-faq .accordion-button:not(.collapsed) {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+}
+
+.accordion-faq .accordion-button:focus {
+    box-shadow: none;
+}
+
+.accordion-faq .accordion-body {
+    padding: 1.2rem;
+    color: var(--gray);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+/* Category header inside right panel */
+.category-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid rgba(80, 58, 152, 0.2);
+}
+
+.category-header h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin: 0;
+}
+
+.category-header p {
+    color: var(--gray);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+    .breadcrumb-bar {
+        padding: 100px 0;
+    }
+    .breadcrumb-bar .breadcrumb-title {
+        font-size: 2.5rem;
+    }
+    .faq-page {
+        padding: 100px 0;
+    }
+    .nav-pills-custom {
+        margin-bottom: 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .breadcrumb-bar {
+        padding: 100px 0;
+        clip-path: polygon(0 0, 100% 0, 100% 95%, 0 100%);
+    }
+    .breadcrumb-bar .breadcrumb-title {
+        font-size: 2rem;
+    }
+    .nav-pills-custom .nav-link {
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+    }
+    .category-header h3 {
+        font-size: 1.3rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .breadcrumb-bar .breadcrumb-title {
+        font-size: 1.6rem;
+    }
+    .faq-accordion-wrapper {
+        padding: 1rem;
+    }
+    .accordion-faq .accordion-button {
+        padding: 1rem;
+        font-size: 0.9rem;
+    }
+}
