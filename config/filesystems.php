@@ -62,7 +62,7 @@ return [
 
         'moodle' => [
             'driver' => 'local',
-            'root' => '/path/to/your/moodledata',   // e.g., '/var/www/moodledata'
+            'root'   => '/home/bafaaelv/moodledata',
             'throw' => false,
         ],
     ],

@@ -323,8 +323,12 @@ class HomePageController extends Controller
      */
     public function showFile($hash, $filename)
     {
+        // Moodle files are stored in: moodledata/filedir/xx/xxxx...
+        // The file path inside moodledata is: filedir/{first 2 chars of hash}/{hash}
         $path = 'filedir/' . substr($hash, 0, 2) . '/' . $hash;
-        
+
+        // Use the 'local' disk configured to point to your moodledata directory
+        // (you'll need to configure this in config/filesystems.php)
         if (Storage::disk('moodle')->exists($path)) {
             $file = Storage::disk('moodle')->get($path);
             $mimeType = Storage::disk('moodle')->mimeType($path);
@@ -332,7 +336,8 @@ class HomePageController extends Controller
                 ->header('Content-Type', $mimeType)
                 ->header('Content-Disposition', 'inline; filename="' . $filename . '"');
         }
-        
+
+        // Fallback to placeholder
         return response()->file(public_path('assets/img/course-placeholder.jpg'));
     }
     
