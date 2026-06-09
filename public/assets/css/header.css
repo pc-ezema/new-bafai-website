@@ -381,6 +381,7 @@ h6 {
     box-shadow: 0 0 40px rgba(0, 0, 0, 0.12);
     display: flex;
     flex-direction: column;
+    -webkit-overflow-scrolling: touch; /* smooth scroll on iOS */
 }
 
 .mobile-sidebar.open {
@@ -768,3 +769,92 @@ h6 {
         padding: 1rem;
     }
 }
+
+/* Make mobile sidebar scrollable */
+.mobile-sidebar {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 85%;
+    max-width: 320px;
+    height: 100vh;  /* use viewport height */
+    background: #ffffff;
+    z-index: 1050;
+    transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    /* Ensure content can scroll */
+    -webkit-overflow-scrolling: touch; /* smooth scroll on iOS */
+}
+
+/* Ensure the header area is sticky at top */
+.mobile-sidebar-header {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 2;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--header-border);
+    flex-shrink: 0;
+}
+
+/* Make the nav area take remaining space and scroll if needed */
+.mobile-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 1rem;
+}
+
+/* Auth section at bottom, not sticky but will be scrolled to if needed */
+.mobile-auth {
+    margin-top: auto;
+    padding: 1.5rem;
+    border-top: 1px solid var(--header-border);
+    background: white;
+    flex-shrink: 0;
+}
+
+/* ============================================
+   OVERLAP FIX: DROPDOWN ON TOP OF EVERYTHING
+   ============================================ */
+
+/* Force dropdowns to be above all page content */
+.main-nav .dropdown-menu,
+.user-dropdown .dropdown-menu {
+    z-index: 99999 !important;
+    position: absolute;
+}
+
+/* Ensure no parent container clips or hides the dropdown */
+.header-one,
+.header-nav,
+.main-nav,
+.main-nav > li {
+    overflow: visible !important;
+    z-index: 1030;
+}
+
+/* Lower the z-index of potential overlapping elements (like banners, sliders) */
+.banner-section,
+.partners-section,
+.swiper-container,
+.slider-section,
+.hero-section,
+.courses-grid-section,
+.carousel,
+.swiper-wrapper,
+.media-card,
+.feature-item,
+.course-card {
+    position: relative;
+    z-index: 1 !important;
+}
+
+/* If the dropdown is still behind, force a higher stacking context on the header */
+.header-one {
+    z-index: 9999 !important;
+    isolation: isolate;
+}
+

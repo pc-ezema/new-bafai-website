@@ -1023,100 +1023,95 @@
     }
 }
 
-
 /* ============================================
-   FIXES FOR MOBILE & DESKTOP MODE ON PHONES
+   FIXES FOR MOBILE ONLY (Desktop unaffected)
    ============================================ */
+@media (max-width: 991px) { /* Adjust breakpoint to match your header's mobile menu */
+    /* 1. Prevent horizontal overflow on all containers */
+    body {
+        overflow-x: hidden !important;
+        width: 100%;
+    }
+    .container, .container-fluid, .row, [class*="col-"] {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
 
-/* 1. Prevent horizontal overflow on all containers */
-body {
-    overflow-x: hidden !important;
-    width: 100%;
-}
-.container, .container-fluid, .row, [class*="col-"] {
-    max-width: 100%;
-    overflow-x: hidden;
-}
+    /* 2. Make all images responsive by default */
+    img {
+        max-width: 100%;
+        height: auto;
+    }
 
-/* 2. Make all images responsive by default */
-img {
-    max-width: 100%;
-    height: auto;
-}
-
-/* 3. Fix partner slider overflow */
-.partners-section {
-    overflow: hidden;
-}
-.partners-swiper-container {
-    overflow: hidden !important;
-}
-.partnersSwiper {
-    overflow: visible !important;
-}
-.partnersSwiper .swiper-wrapper {
-    display: flex;
-    flex-wrap: nowrap;
-}
-.partner-item {
-    min-width: 120px;        /* adjust as needed */
-    width: auto;
-    flex-shrink: 0;
-    margin: 0 8px;
-}
-/* On very small screens, reduce partner item width */
-@media (max-width: 576px) {
+    /* 3. Fix partner slider overflow */
+    .partners-section {
+        overflow: hidden;
+    }
+    .partners-swiper-container {
+        overflow: hidden !important;
+    }
+    .partnersSwiper {
+        overflow: visible !important;
+    }
+    .partnersSwiper .swiper-wrapper {
+        display: flex;
+        flex-wrap: nowrap;
+    }
     .partner-item {
-        min-width: 100px;
-        padding: 0.5rem 1rem;
+        min-width: 120px;
+        width: auto;
+        flex-shrink: 0;
+        margin: 0 8px;
     }
-    .partner-item img {
-        max-height: 40px;
+    @media (max-width: 576px) {
+        .partner-item {
+            min-width: 100px;
+            padding: 0.5rem 1rem;
+        }
+        .partner-item img {
+            max-height: 40px;
+        }
     }
-}
 
-/* 4. Force swiper slides to not cause horizontal scroll */
-.swiper-slide {
-    width: auto !important;
-    flex-shrink: 0;
-}
+    /* 4. Force swiper slides to not cause horizontal scroll */
+    .swiper-slide {
+        width: auto !important;
+        flex-shrink: 0;
+    }
 
-/* 5. Fix top courses carousel slide width on mobile */
-@media (max-width: 768px) {
+    /* 5. Fix top courses carousel slide width on mobile */
     .courses-swiper .swiper-slide {
         width: 240px !important;
         margin-right: 12px;
     }
-}
-@media (max-width: 576px) {
-    .courses-swiper .swiper-slide {
-        width: 200px !important;
-        margin-right: 10px;
+    @media (max-width: 576px) {
+        .courses-swiper .swiper-slide {
+            width: 200px !important;
+            margin-right: 10px;
+        }
     }
-}
 
-/* 6. Ensure images in media cards and course cards don't overflow */
-.media-thumbnail img,
-.course-img img,
-.mini-course-img img,
-.get-started-media img,
-.about-image img {
-    width: 100%;
-    height: auto;
-    object-fit: cover;
-}
-.media-thumbnail {
-    aspect-ratio: 16 / 9;
-}
-.course-img {
-    aspect-ratio: 16 / 9;
-}
-.mini-course-img {
-    aspect-ratio: 16 / 9;
-}
+    /* 6. Ensure images in media cards and course cards don't overflow */
+    .media-thumbnail img,
+    .course-img img,
+    .mini-course-img img,
+    .get-started-media img,
+    .about-image img {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+    }
+    .media-thumbnail {
+        aspect-ratio: 16 / 9;
+    }
+    .course-img {
+        aspect-ratio: 16 / 9;
+    }
+    .mini-course-img {
+        aspect-ratio: 16 / 9;
+    }
 
-/* 7. Fix banner section background & content on very small devices */
-@media (max-width: 576px) {
+    /* 7. Fix banner section background & content on very small devices */
     .banner-section {
         padding: 50px 0;
     }
@@ -1134,16 +1129,14 @@ img {
         justify-content: center;
         gap: 0.5rem;
     }
-}
 
-/* 8. Ensure feature grid doesn't overflow on tablet */
-@media (max-width: 768px) {
+    /* 8. Ensure feature grid doesn't overflow on tablet */
     .feature-grid {
         grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     }
-}
 
-/* 9. Make accordion text readable */
-.accordion-button {
-    word-break: break-word;
+    /* 9. Make accordion text readable */
+    .accordion-button {
+        word-break: break-word;
+    }
 }
