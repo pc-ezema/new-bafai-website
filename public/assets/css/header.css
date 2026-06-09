@@ -701,3 +701,70 @@ h6 {
 .mobile-logout-btn:hover {
     background: #c82333;
 }
+
+/* ============================================
+   FIXES FOR MOBILE SIDEBAR - PREVENT CUTOFF
+   ============================================ */
+
+/* Ensure the mobile sidebar takes full height and scrolls if needed */
+.mobile-sidebar {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 100vh;
+}
+
+/* Extra bottom padding for the mobile auth section to avoid cut-off */
+.mobile-auth {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+}
+
+/* On very short screens, allow scrolling and add extra safety */
+@media (max-height: 600px) {
+    .mobile-sidebar {
+        padding-bottom: 30px;
+    }
+    .mobile-auth {
+        margin-top: 20px;
+        padding-top: 12px;
+        padding-bottom: 25px;
+    }
+}
+
+/* Ensure the close button is not overlapped and the header stays on top */
+.mobile-sidebar-header {
+    flex-shrink: 0;
+    background: #fff;
+    z-index: 1;
+}
+
+/* Make sure the mobile nav doesn't push auth off screen */
+.mobile-nav {
+    flex: 1 1 auto;
+    overflow-y: auto;
+}
+
+/* Improve touch targets for auth buttons on mobile */
+.mobile-auth .btn-signin,
+.mobile-auth .btn-signup,
+.mobile-logout-btn {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.9rem;
+}
+
+/* Prevent the entire sidebar from overflowing on very narrow devices */
+@media (max-width: 380px) {
+    .mobile-sidebar {
+        width: 90%;
+        max-width: 280px;
+    }
+    .mobile-nav > li > a {
+        padding: 0.8rem 1rem;
+        font-size: 0.85rem;
+    }
+    .mobile-auth {
+        padding: 1rem;
+    }
+}
