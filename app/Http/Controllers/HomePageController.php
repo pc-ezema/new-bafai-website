@@ -613,7 +613,7 @@ class HomePageController extends Controller
 
         // Send email to admin
         try {
-            Mail::to(config('mail.admin_email', 'admin@example.com'))
+            Mail::to(config('mail.admin_email', 'admin@bafai.ai'))
                 ->send(new SponsorshipApplicationMail($application));
         } catch (\Exception $e) {
             Log::error('Failed to send sponsorship email: ' . $e->getMessage());
