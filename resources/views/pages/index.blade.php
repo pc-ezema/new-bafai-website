@@ -174,7 +174,7 @@
         <div class="row g-4">
             @foreach($featuredCourses as $key => $course)
                 @php
-                    // Build image URL
+                    // Build image URL (keep this as is)
                     if($course->image_hash && $course->image_filename) {
                         $imageUrl = route('moodle.file', [
                             'hash' => $course->image_hash,
@@ -183,15 +183,6 @@
                     } else {
                         $imageUrl = asset('assets/img/course-placeholder.jpg');
                     }
-
-                    // Get price (example – adapt to your logic)
-                    $price = match($course->id) {
-                        5 => 199,
-                        6 => 299,
-                        10 => 399,
-                        12 => 249,
-                        default => 149,
-                    };
                 @endphp
                 <div class="col-md-6 col-lg-4" data-aos="flip-up" data-aos-duration="800" data-aos-delay="{{ 100 + ($key * 100) }}">
                     <div class="course-card">
@@ -202,7 +193,14 @@
                             <h5 class="course-title">{{ Str::limit($course->fullname, 50) }}</h5>
                             <p class="text-muted small">{{ Str::limit(strip_tags($course->summary), 100) }}</p>
                             <div class="d-flex justify-content-between align-items-center">
-                                <span class="course-price">${{ $price }}</span>
+                                {{-- 🟢 DYNAMIC PRICE FROM CONTROLLER --}}
+                                <span class="course-price">
+                                    @if($course->price > 0)
+                                        {{ $course->currency }} {{ number_format($course->price, 2) }}
+                                    @else
+                                        Free
+                                    @endif
+                                </span>
                                 <a href="{{ route('course-details', $course->id) }}" class="btn btn-outline-primary-custom">
                                     View Details <i class="fas fa-arrow-right ms-2"></i>
                                 </a>
@@ -217,7 +215,6 @@
         </div>
     </div>
 </section>
-
 <!-- Get Started Section -->
 <section class="get-started-section">
     <div class="container">
