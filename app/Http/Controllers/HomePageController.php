@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\SponsorshipApplicationMail;
 use App\Mail\WelcomeUserMail;
+use App\Models\BlogPost;
 use App\Models\Course;
 use App\Models\CourseCategory;
 use App\Models\MoodleUser;
+use App\Models\SponsorshipApplication;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
@@ -15,6 +18,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class HomePageController extends Controller
 {
@@ -44,15 +48,29 @@ class HomePageController extends Controller
     }
 
     /**
+     * Get the price for a course from Moodle's custom field.
+     */
+    private function getCoursePrice($courseId)
+    {
+        $enrolment = DB::table('mdlhpdl_enrol')
+            ->where('courseid', $courseId)
+            ->where('enrol', 'fee') // Change to 'stripe' if needed
+            ->where('status', 1)
+            ->first();
+
+        return $enrolment ? floatval($enrolment->cost) : 0; // 0 means free
+    }
+
+    /**
      * Handle the incoming request.
      *
      * @return \Illuminate\Http\Response
      */
     public function index()
     {
-        // Fetch featured courses (e.g., first 6 visible courses, ordered by sortorder)
+        // 1. Fetch featured courses
         $featuredCourses = Course::visible()
-            ->where('mdlhpdl_course.id', '>', 1) // exclude site course
+            ->where('mdlhpdl_course.id', '>', 1)
             ->leftJoin('mdlhpdl_course_categories', 'mdlhpdl_course.category', '=', 'mdlhpdl_course_categories.id')
             ->leftJoin('mdlhpdl_context', function($join) {
                 $join->on('mdlhpdl_context.instanceid', '=', 'mdlhpdl_course.id')
@@ -74,7 +92,7 @@ class HomePageController extends Controller
             ->limit(6)
             ->get();
 
-        // Top rated courses (example: latest 6 courses, or you can join ratings table)
+        // 2. Fetch top courses
         $topCourses = Course::visible()
             ->where('mdlhpdl_course.id', '>', 1)
             ->leftJoin('mdlhpdl_course_categories', 'mdlhpdl_course.category', '=', 'mdlhpdl_course_categories.id')
@@ -97,6 +115,30 @@ class HomePageController extends Controller
             ->orderBy('mdlhpdl_course.sortorder', 'desc')
             ->limit(6)
             ->get();
+
+        // 3. 🔽 COLLECT ALL COURSE IDs FROM BOTH COLLECTIONS
+        $allCourseIds = $featuredCourses->pluck('id')->merge($topCourses->pluck('id'))->unique()->toArray();
+
+        // 4. 🔽 FETCH ALL PRICES IN ONE SINGLE QUERY
+        $enrolments = DB::table('mdlhpdl_enrol')
+            ->whereIn('courseid', $allCourseIds)
+            ->where('enrol', 'fee') // Change to 'stripe' if needed
+            ->where('status', 1)
+            ->get()
+            ->keyBy('courseid'); // Key by course ID for fast lookup
+
+        // 5. 🔽 ATTACH PRICES TO BOTH COLLECTIONS
+        foreach ($featuredCourses as $course) {
+            $enrol = $enrolments->get($course->id);
+            $course->price = $enrol ? floatval($enrol->cost) : 0;
+            $course->currency = $enrol ? $enrol->currency : 'USD';
+        }
+
+        foreach ($topCourses as $course) {
+            $enrol = $enrolments->get($course->id);
+            $course->price = $enrol ? floatval($enrol->cost) : 0;
+            $course->currency = $enrol ? $enrol->currency : 'USD';
+        }
 
         return view('pages.index', compact('featuredCourses', 'topCourses'));
     }
@@ -168,33 +210,41 @@ class HomePageController extends Controller
     {
         $selectedCategory = $request->input('category');
         
-        // Build the base query – using a subquery to get a single overview file per course
+        // Build the base query – joining the enrol table to get the price
         $query = Course::visible()
             ->where('mdlhpdl_course.id', '>', 1) // exclude site course
             ->leftJoin('mdlhpdl_course_categories', 'mdlhpdl_course.category', '=', 'mdlhpdl_course_categories.id')
             ->leftJoin('mdlhpdl_context', function($join) {
                 $join->on('mdlhpdl_context.instanceid', '=', 'mdlhpdl_course.id')
-                     ->where('mdlhpdl_context.contextlevel', '=', 50); // course context
+                    ->where('mdlhpdl_context.contextlevel', '=', 50);
             })
             ->leftJoin('mdlhpdl_files', function($join) {
-                // Subquery: take only the first overview file (by id) for each context
                 $join->on('mdlhpdl_files.contextid', '=', 'mdlhpdl_context.id')
-                     ->whereRaw('mdlhpdl_files.id = (
-                         SELECT f2.id FROM mdlhpdl_files f2
-                         WHERE f2.contextid = mdlhpdl_context.id
-                           AND f2.component = "course"
-                           AND f2.filearea = "overviewfiles"
-                           AND f2.filename != "."
-                         ORDER BY f2.id ASC
-                         LIMIT 1
-                     )');
+                    ->whereRaw('mdlhpdl_files.id = (
+                        SELECT f2.id FROM mdlhpdl_files f2
+                        WHERE f2.contextid = mdlhpdl_context.id
+                        AND f2.component = "course"
+                        AND f2.filearea = "overviewfiles"
+                        AND f2.filename != "."
+                        ORDER BY f2.id ASC
+                        LIMIT 1
+                    )');
+            })
+            // 🔽 ADD THIS JOIN TO GET THE PRICE
+            ->leftJoin('mdlhpdl_enrol', function($join) {
+                $join->on('mdlhpdl_enrol.courseid', '=', 'mdlhpdl_course.id')
+                    ->where('mdlhpdl_enrol.enrol', '=', 'fee') // or 'payrol, stripe'
+                    ->where('mdlhpdl_enrol.status', '=', 1);      // only active enrolments
             })
             ->select(
                 'mdlhpdl_course.*',
                 'mdlhpdl_course_categories.name as category_name',
-                'mdlhpdl_context.id as context_id',        // needed for direct pluginfile URL
+                'mdlhpdl_context.id as context_id',
                 'mdlhpdl_files.filename as image_filename',
-                'mdlhpdl_files.contenthash as image_hash'
+                'mdlhpdl_files.contenthash as image_hash',
+                // 🔽 SELECT THE PRICE AND CURRENCY
+                'mdlhpdl_enrol.cost as price',
+                'mdlhpdl_enrol.currency as currency'
             );
         
         // Apply category filter
@@ -240,12 +290,20 @@ class HomePageController extends Controller
                         ->where('mdlhpdl_files.filearea', '=', 'overviewfiles')
                         ->where('mdlhpdl_files.filename', '!=', '.');
                 })
+                // JOIN TO GET THE PRICE
+                ->leftJoin('mdlhpdl_enrol', function($join) {
+                    $join->on('mdlhpdl_enrol.courseid', '=', 'mdlhpdl_course.id')
+                        ->where('mdlhpdl_enrol.enrol', '=', 'fee') // Change to 'stripe' if needed
+                        ->where('mdlhpdl_enrol.status', '=', 1);
+                })
                 ->select(
                     'mdlhpdl_course.*',
                     'mdlhpdl_course_categories.name as category_name',
                     'mdlhpdl_context.id as context_id',
                     'mdlhpdl_files.filename as image_filename',
-                    'mdlhpdl_files.contenthash as image_hash'
+                    'mdlhpdl_files.contenthash as image_hash',
+                    'mdlhpdl_enrol.cost as price',
+                    'mdlhpdl_enrol.currency as currency'
                 )
                 ->first();
             
@@ -298,17 +356,11 @@ class HomePageController extends Controller
             // Enrollment URL
             $moodleUrl = config('app.moodle_base_url', 'https://your-moodle.com');
             $enrollUrl = $moodleUrl . '/course/view.php?id=' . $course->id;
+
+            $price = $course->price ? floatval($course->price) : 0;
+            $currency = $course->currency ?? 'USD';
             
-            // Price (example)
-            $price = match($course->id) {
-                5 => 199,
-                6 => 299,
-                10 => 399,
-                12 => 249,
-                default => 149,
-            };
-            
-            return compact('course', 'instructor', 'sections', 'avgRating', 'ratingCount', 'enrollUrl', 'price');
+            return compact('course', 'instructor', 'sections', 'avgRating', 'ratingCount', 'enrollUrl', 'price', 'currency');
         });
 
         // Add dynamic cart check after cache (always fresh)
@@ -418,14 +470,18 @@ class HomePageController extends Controller
 
     public function register(Request $request)
     {
-        // Validation – add country rule
+        // Validation
         $request->validate([
-            'username'  => 'required|string|min:3|max:100|unique:mdlhpdl_user,username',
-            'firstname' => 'required|string|max:100',
-            'lastname'  => 'required|string|max:100',
-            'email'     => 'required|email|unique:users,email|unique:mdlhpdl_user,email',
-            'country'   => 'required|string|size:2', // ISO 3166-1 alpha-2
-            'password'  => [
+            'username'       => 'required|string|min:3|max:100|unique:mdlhpdl_user,username',
+            'firstname'      => 'required|string|max:100',
+            'lastname'       => 'required|string|max:100',
+            'email'          => 'required|email|unique:users,email|unique:mdlhpdl_user,email',
+            'country'        => 'required|string|size:2',
+            // NEW RULES
+            'phone_primary'  => 'required|string|max:20|regex:/^[0-9+\-\s()]+$/', // simple phone validation
+            'phone_secondary'=> 'nullable|string|max:20|regex:/^[0-9+\-\s()]+$/',
+            'referred_by'    => 'nullable|string|max:20', // ensure the code exists
+            'password'       => [
                 'required',
                 'min:8',
                 'confirmed',
@@ -436,9 +492,10 @@ class HomePageController extends Controller
             ],
         ], [
             'password.regex' => 'Password must contain at least one uppercase, one lowercase, one digit, and one special character.',
+            'phone_primary.regex' => 'Please enter a valid phone number.',
         ]);
 
-        // Create Moodle user (add country to insert)
+        // Create Moodle user (only fields that exist in mdl_user)
         $now = time();
         $hashedPassword = $this->generateSha512CryptHash($request->password);
 
@@ -448,31 +505,123 @@ class HomePageController extends Controller
             'firstname'     => $request->firstname,
             'lastname'      => $request->lastname,
             'email'         => $request->email,
-            'country'       => $request->country,   // ADDED
+            'country'       => $request->country,
             'confirmed'     => 1,
             'deleted'       => 0,
             'suspended'     => 0,
             'auth'          => 'manual',
+            'phone1'        => $request->phone_primary,
+            'phone2'        => $request->phone_secondary,
             'mnethostid'    => 1,
             'timecreated'   => $now,
             'timemodified'  => $now,
         ]);
 
-        // Create local Laravel user (optional: you can also store country here if needed)
+        // ✅ Generate unique referral code for this user (e.g., 8-char alphanumeric)
+        do {
+            $referralCode = strtoupper(substr(md5(uniqid($moodleId, true)), 0, 8));
+        } while (User::where('referral_code', $referralCode)->exists());
+
+        // Create local user
         $user = User::create([
-            'firstname' => $request->firstname,
-            'lastname'  => $request->lastname,
-            'email'     => $request->email,
-            'password'  => Hash::make($request->password),
-            'country'   => $request->country,
-            'moodle_id' => $moodleId,
+            'firstname'       => $request->firstname,
+            'lastname'        => $request->lastname,
+            'email'           => $request->email,
+            'password'        => Hash::make($request->password),
+            'country'         => $request->country,
+            'moodle_id'       => $moodleId,
+            // NEW FIELDS
+            'referral_code'   => $referralCode,           // this user's own code
+            'referred_by'     => $request->referred_by,   // code they used (if any)
+            'phone_primary'   => $request->phone_primary,
+            'phone_secondary' => $request->phone_secondary,
         ]);
 
-        // Send welcome email (include country if you want)
-        Mail::to($request->email)->send(new WelcomeUserMail($request->firstname, $request->username, $request->password));
+        // Send welcome email (you can include the user's new referral code)
+        Mail::to($request->email)->send(new WelcomeUserMail($request->firstname, $request->username, $request->password, $referralCode));
 
         Auth::login($user);
 
-        return redirect()->route('cart.index')->with('success', 'Registration successful! Check your email for login details.');
+        return redirect()->route('cart.index')->with('success', 'Registration successful! Your referral code is: ' . $referralCode);
+    }
+
+    public function getBlogPosts()
+    {
+        $posts = BlogPost::published()
+            ->orderBy('published_at', 'desc')
+            ->paginate(9);
+
+        return view('pages.blog.index', compact('posts'));
+    }
+
+    public function showBlogPost($slug)
+    {
+        $post = BlogPost::published()
+            ->where('slug', $slug)
+            ->firstOrFail();
+
+        // prevent multiple counts per session
+        if (!session()->has('viewed_post_' . $post->id)) {
+            $post->increment('views');
+            session()->put('viewed_post_' . $post->id, true);
+        }
+
+        // Get previous and next posts (optional)
+        $previous = BlogPost::published()
+            ->where('published_at', '<', $post->published_at)
+            ->orderBy('published_at', 'desc')
+            ->first();
+
+        $next = BlogPost::published()
+            ->where('published_at', '>', $post->published_at)
+            ->orderBy('published_at', 'asc')
+            ->first();
+
+        return view('pages.blog.show', compact('post', 'previous', 'next'));
+    }
+
+    public function storeSponsorshipApplication(Request $request)
+    {       
+        // Validate based on the form type
+        $rules = [
+            'type' => 'required|in:sponsor,student',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'phone' => 'required|string|max:20',
+            'consent' => 'accepted',
+        ];
+
+        if ($request->type === 'sponsor') {
+            $rules['student_count'] = 'required|integer|min:1';
+        } else {
+            $rules['essay'] = 'required|string|min:50';
+        }
+
+        $validated = $request->validate($rules);
+
+        // Store the application
+        $application = SponsorshipApplication::create([
+            'type' => $validated['type'],
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'],
+            'student_count' => $validated['student_count'] ?? null,
+            'essay' => $validated['essay'] ?? null,
+            'consent' => true,
+            'status' => 'pending',
+        ]);
+
+        // Send email to admin
+        try {
+            Mail::to(config('mail.admin_email', 'admin@example.com'))
+                ->send(new SponsorshipApplicationMail($application));
+        } catch (\Exception $e) {
+            Log::error('Failed to send sponsorship email: ' . $e->getMessage());
+        }
+
+        // Optionally send a confirmation email to the applicant
+        // Mail::to($application->email)->send(new SponsorshipConfirmationMail($application));
+
+        return redirect()->back()->with('success', 'Your application has been submitted successfully! We will contact you soon.');
     }
 }

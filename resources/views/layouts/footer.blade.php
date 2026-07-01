@@ -17,13 +17,14 @@
                             <div class="row row-gap-4">
                                 <div class="col-lg-4 col-md-4">
                                     <div class="footer-widget footer-menu">
-                                        <h3 class="footer-title">Support</h3>
+                                        <h3 class="footer-title">Courses</h3>
                                         <ul>
-                                            <li><a href="#">Education</a></li>
-                                            <li><a href="#">Enroll Course</a></li>
-                                            <li><a href="#">Orders</a></li>
-                                            <li><a href="#">Payments</a></li>
-                                            <li><a href="#">Blogs</a></li>
+                                            <li><a href="{{ url('/courses') }}">CAIF</a></li>
+                                            <li><a href="{{ url('/courses') }}">CAITM</a></li>
+                                            <li><a href="{{ url('/courses') }}">Agentic AI</a></li>
+                                            <li><a href="{{ url('/courses') }}">Workflow Automation</a></li>
+                                            <li><a href="{{ url('/courses') }}">Data Annotation</a></li>
+                                            <li><a href="{{ url('/courses') }}">AI Ethics & Governance</a></li>
                                         </ul>
                                     </div>
                                 </div>
@@ -32,11 +33,10 @@
                                     <div class="footer-widget footer-menu">
                                         <h3 class="footer-title">About</h3>
                                         <ul>
-                                            <li><a href="#">Categories</a></li>
-                                            <li><a href="#">Courses</a></li>
-                                            <li><a href="#">About Us</a></li>
-                                            <li><a href="#">FAQ</a></li>
-                                            <li><a href="#">Contact</a></li>
+                                            <li><a href="{{ url('/about') }}">About Us</a></li>
+                                            <li><a href="{{ url('/courses') }}">Courses</a></li>
+                                            <li><a href="{{ url('/about') }}#WhoWeAre">Who We Are</a></li>
+                                            <li><a href="{{ url('/about') }}#WhyLearnWithBAFAI">Why Learn with BAFAI?</a></li>
                                         </ul>
                                     </div>
                                 </div>
@@ -45,11 +45,10 @@
                                     <div class="footer-widget footer-menu">
                                         <h3 class="footer-title">Useful Links</h3>
                                         <ul>
-                                            <li><a href="#">Our Values</a></li>
-                                            <li><a href="#">Advisory Board</a></li>
-                                            <li><a href="#">Our Partners</a></li>
-                                            <li><a href="#">Become a Partner</a></li>
-                                            <li><a href="#">Work at BAFAI</a></li>
+                                            <li><a href="{{ url('/blog') }}">Blog</a></li>
+                                            <li><a href="{{ url('/faqs') }}">FAQs</a></li>
+                                            <li><a href="{{ url('/sponsorship') }}">Sponsorship</a></li>
+                                            <li><a href="{{ url('/testimonials') }}">Testimonials</a></li>
                                         </ul>
                                     </div>
                                 </div>
@@ -118,6 +117,9 @@
         </div>
     </div>
 
+    <!-- Google Translate Widget -->
+    <div id="google_translate_element" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;"></div>
+
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
@@ -138,6 +140,20 @@
 
     <!-- Main JavaScript (consolidated) -->
     <script src="{{ url('assets/js/main.js') }}"></script>
+
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'en',
+                includedLanguages: 'en,fr,es,ar,zh-CN,de,it,pt,ru,ja,ko,hi,bn,ur,id,ms,th,vi,pl,tr,fa,he,sv,no,da,fi,el,nl,cs,ro,hu,sk,uk,ca,eu,gl,hr,sr,sl,et,lv,lt,is,sw,am,tl,ne,ta,te,ml,kn,gu,pa,si,my,km,lo,mn,ka,hy,az,uz,ky,tg,be,bs,az,la',
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+                autoDisplay: false
+            }, 'google_translate_element');
+        }
+    </script>
+
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
+    </script>
 
     @stack('scripts')
     </body>

@@ -12,7 +12,7 @@
 @include('layouts.breadcrumb', ['title' => 'About BAFAI', 'breadcrumb' => 'About Us'])
 
 <!-- Who We Are Section -->
-<section class="who-we-are">
+<section class="who-we-are" id="WhoWeAre">
     <div class="container">
         <div class="row align-items-center g-5">
             <div class="col-lg-6" data-aos="fade-right" data-aos-duration="800" data-aos-delay="100">
@@ -54,7 +54,7 @@
 </section>
 
 <!-- Why Learn with BAFAI? Section -->
-<section class="why-bafai">
+<section class="why-bafai" id="WhyLearnWithBAFAI">
     <div class="container">
         <div class="section-header" data-aos="fade-up" data-aos-duration="800">
             <h2>Why Learn with BAFAI?</h2>

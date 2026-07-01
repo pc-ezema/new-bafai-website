@@ -346,3 +346,73 @@ body {
 .form-container.active-form {
     display: block;
 }
+
+/* Custom Alert Styles */
+.custom-alert {
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    border-left: 5px solid;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    margin-bottom: 1.5rem;
+    animation: slideDown 0.4s ease forwards;
+}
+
+.custom-alert-success {
+    background: #e8f5e9;
+    border-color: #2e7d32;
+    color: #1e4620;
+}
+
+.custom-alert-danger {
+    background: #fbe9e7;
+    border-color: #c62828;
+    color: #811c1c;
+}
+
+.custom-alert-info {
+    background: #e3f2fd;
+    border-color: #0d47a1;
+    color: #0a2b4a;
+}
+
+.custom-alert i {
+    font-size: 1.4rem;
+}
+
+.custom-alert .alert-close {
+    margin-left: auto;
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    line-height: 1;
+    color: inherit;
+    opacity: 0.6;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    padding: 0 0.25rem;
+}
+
+.custom-alert .alert-close:hover {
+    opacity: 1;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.spinner-border {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 0.2em solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spinner-border 0.75s linear infinite;
+}
+@keyframes spinner-border {
+    to { transform: rotate(360deg); }
+}

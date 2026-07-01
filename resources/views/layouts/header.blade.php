@@ -60,10 +60,18 @@
                     <li><a href="{{ url('/testimonials') }}">Testimonials</a></li>
                 </ul>
             </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-globe"></i> Language
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="languageDropdown" id="google_translate_element">
+                    <!-- Google Translate will render here -->
+                </ul>
+            </li>
         </ul>
         <div class="mobile-auth">
             @guest
-                <a href="{{ url('/login') }}" class="btn-signin">Sign In</a>
+                <a href="https://learn.bafai.ai/login/index.php" class="btn-signin">Sign In</a>
                 <a href="{{ url('/register') }}" class="btn-signup">Sign Up</a>
             @endguest
 
@@ -120,6 +128,14 @@
                                 <li><a href="{{ url('/testimonials') }}"><i class="fas fa-star"></i> Testimonials</a></li>
                             </ul>
                         </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-globe"></i> Language
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="languageDropdown" id="google_translate_element">
+                                <!-- Google Translate will render here -->
+                            </ul>
+                        </li>
                     </ul>
 
                     <!-- Header Actions -->
@@ -136,7 +152,7 @@
                         <!-- Auth Buttons -->
                         <div class="auth-buttons">
                             @guest
-                                <a href="{{ url('/login') }}" class="btn-signin">Sign In</a>
+                                <a href="https://learn.bafai.ai/login/index.php" class="btn-signin">Sign In</a>
                                 <a href="{{ url('/register') }}" class="btn-signup">Sign Up</a>
                             @endguest
 

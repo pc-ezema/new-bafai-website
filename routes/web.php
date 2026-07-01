@@ -14,6 +14,8 @@ Route::get('/faculty', [HomePageController::class, 'faculty'])->name('faculty');
 Route::get('/courses', [HomePageController::class, 'courses'])->name('courses');
 Route::get('/course/{slug}', [HomePageController::class, 'courseDetails'])->name('course-details');
 Route::get('/moodle-file/{hash}/{filename}', [HomePageController::class, 'showFile'])->name('moodle.file');
+Route::get('/blog', [HomePageController::class, 'getBlogPosts'])->name('blog.index');
+Route::get('/blog/{slug}', [HomePageController::class, 'showBlogPost'])->name('blog.show');
 
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
 Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
@@ -27,6 +29,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/checkout', [CartController::class, 'process'])->name('checkout');
     Route::post('/cart/enroll', [CartController::class, 'enroll'])->name('cart.enroll');
 });
+Route::post('/sponsorship/apply', [HomePageController::class, 'storeSponsorshipApplication'])->name('sponsorship.apply');
 
 
 Route::get('/login', [HomePageController::class, 'login'])->name('login');

@@ -173,6 +173,13 @@ body {
                 @if ($errors->any())
                     <div class="alert alert-danger">{{ $errors->first() }}</div>
                 @endif
+
+                @if(session('success'))
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {{ session('success') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                @endif
                 <form method="POST" action="{{ route('register') }}">
                     @csrf
                     <div class="form-group">
@@ -206,6 +213,29 @@ body {
                         @enderror
                     </div>
                     <div class="form-group">
+                        <label for="phone_primary">Phone Number (Primary) *</label>
+                        <input type="tel" name="phone_primary" id="phone_primary" class="form-control @error('phone_primary') is-invalid @enderror" value="{{ old('phone_primary') }}" required>
+                        @error('phone_primary')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone_secondary">Phone Number (Secondary) <span class="text-muted">(optional)</span></label>
+                        <input type="tel" name="phone_secondary" id="phone_secondary" class="form-control @error('phone_secondary') is-invalid @enderror" value="{{ old('phone_secondary') }}">
+                        @error('phone_secondary')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label for="referral_code">Referral Code <span class="text-muted">(optional – if you have one)</span></label>
+                        <input type="text" name="referred_by" id="referral_code" class="form-control @error('referred_by') is-invalid @enderror" value="{{ old('referred_by') }}" placeholder="Enter someone's referral code">
+                        @error('referred_by')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="form-group">
                         <label>Password</label>
                         <input type="password" name="password" class="form-control" required>
                         <small class="text-muted">Min 8 chars, 1 uppercase, 1 lowercase, 1 digit, 1 special character</small>
@@ -214,7 +244,10 @@ body {
                         <label>Confirm Password</label>
                         <input type="password" name="password_confirmation" class="form-control" required>
                     </div>
-                    <button type="submit" class="btn-login">Register</button>
+                    <button type="submit" class="btn-login w-100" id="registerBtn">
+                        <span class="spinner-border spinner-border-sm d-none me-2" id="registerSpinner" role="status" aria-hidden="true"></span>
+                        <span id="registerBtnText">Register</span>
+                    </button>
                 </form>
                 <div class="text-center mt-3">
                     Already have an account? <a href="{{ route('login') }}">Sign In</a>
@@ -224,3 +257,62 @@ body {
     </div>
 </section>
 @endsection
+
+@push('scripts')
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form[action="{{ route('register') }}"]');
+        const submitBtn = document.getElementById('registerBtn');
+        const spinner = document.getElementById('registerSpinner');
+        const btnText = document.getElementById('registerBtnText');
+
+        if (!form) return;
+
+        form.addEventListener('submit', function(e) {
+            // 1️⃣ If form is invalid (HTML5 validation), let browser handle it
+            if (!form.checkValidity()) {
+                // Re-enable button in case it was disabled from a previous attempt
+                enableButton();
+                return;
+            }
+
+            // 2️⃣ Prevent double submission
+            if (submitBtn.disabled) {
+                e.preventDefault();
+                return;
+            }
+
+            // 3️⃣ Disable button and show spinner
+            disableButton();
+        });
+
+        // 4️⃣ Re-enable if any field becomes invalid (so user can correct and re-submit)
+        form.querySelectorAll('input, select, textarea').forEach(field => {
+            field.addEventListener('invalid', function() {
+                enableButton();
+            });
+            // Also re-enable if the user changes a field (optional)
+            field.addEventListener('input', function() {
+                if (submitBtn.disabled) {
+                    enableButton();
+                }
+            });
+        });
+
+        function disableButton() {
+            submitBtn.disabled = true;
+            spinner.classList.remove('d-none');
+            btnText.textContent = 'Registering...';
+        }
+
+        function enableButton() {
+            submitBtn.disabled = false;
+            spinner.classList.add('d-none');
+            btnText.textContent = 'Register';
+        }
+    });
+</script>
+@endpush

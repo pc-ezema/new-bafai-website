@@ -90,16 +90,54 @@
             <button class="form-tab-btn active" id="sponsor-tab">Apply to Sponsor</button>
             <button class="form-tab-btn" id="student-tab">Apply for Sponsorship</button>
         </div>
+        @if($errors->any())
+            <div class="custom-alert custom-alert-danger" role="alert">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>
+                    <strong>Please fix the following errors:</strong>
+                    <ul class="mb-0 mt-1" style="padding-left: 1.2rem;">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                <button class="alert-close" data-close="alert" aria-label="Close">&times;</button>
+            </div>
+        @endif
+        @if(session('success'))
+            <div class="custom-alert custom-alert-success" role="alert">
+                <i class="fas fa-check-circle"></i>
+                <span>{{ session('success') }}</span>
+                <button class="alert-close" data-close="alert" aria-label="Close">&times;</button>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="custom-alert custom-alert-danger" role="alert">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>{{ session('error') }}</span>
+                <button class="alert-close" data-close="alert" aria-label="Close">&times;</button>
+            </div>
+        @endif
+
+        @if(session('info'))
+            <div class="custom-alert custom-alert-info" role="alert">
+                <i class="fas fa-info-circle"></i>
+                <span>{{ session('info') }}</span>
+                <button class="alert-close" data-close="alert" aria-label="Close">&times;</button>
+            </div>
+        @endif
 
         <!-- Sponsor Form (for organizations/individuals sponsoring candidates) -->
         <div id="sponsor-form-container" class="form-container active-form" data-aos="fade-up" data-aos-duration="800" data-aos-delay="100">
             <h3><i class="fas fa-building me-2"></i> Apply to Sponsor</h3>
             <p class="text-muted mb-4">For individuals or organisations sponsoring candidates</p>
-            <form action="#" method="POST" id="sponsorForm">
+            <form action="{{ route('sponsorship.apply') }}" method="POST" id="sponsorForm">
                 @csrf
+                <input type="hidden" name="type" value="sponsor">
                 <div class="mb-3">
                     <label class="form-label">Individual Name / Organisational Name *</label>
-                    <input type="text" name="sponsor_name" class="form-control" required>
+                    <input type="text" name="name" class="form-control" required>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Email Address *</label>
@@ -117,7 +155,11 @@
                     <input type="checkbox" name="consent" class="form-check-input" id="sponsorConsent" required>
                     <label class="form-check-label" for="sponsorConsent">Yes, I agree with the privacy policy and terms and conditions.</label>
                 </div>
-                <button type="submit" class="btn btn-submit w-100">Apply for Sponsorship <i class="fas fa-arrow-right ms-2"></i></button>
+                <button type="submit" class="btn btn-submit w-100" id="sponsorSubmitBtn">
+                    <span class="spinner-border spinner-border-sm d-none me-2" role="status" aria-hidden="true"></span>
+                    <span class="btn-text">Apply for Sponsorship</span>
+                    <i class="fas fa-arrow-right ms-2"></i>
+                </button>
             </form>
         </div>
 
@@ -125,11 +167,12 @@
         <div id="student-form-container" class="form-container" data-aos="fade-up" data-aos-duration="800" data-aos-delay="100">
             <h3><i class="fas fa-user-graduate me-2"></i> Apply for Sponsorship</h3>
             <p class="text-muted mb-4">For individuals applying for sponsorship</p>
-            <form action="#" method="POST" id="studentForm">
+            <form action="{{ route('sponsorship.apply') }}" method="POST" id="studentForm">
                 @csrf
+                <input type="hidden" name="type" value="student">
                 <div class="mb-3">
                     <label class="form-label">Full Name *</label>
-                    <input type="text" name="full_name" class="form-control" required>
+                    <input type="text" name="name" class="form-control" required>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Email Address *</label>
@@ -147,7 +190,11 @@
                     <input type="checkbox" name="consent" class="form-check-input" id="studentConsent" required>
                     <label class="form-check-label" for="studentConsent">Yes, I agree with the privacy policy and terms and conditions.</label>
                 </div>
-                <button type="submit" class="btn btn-submit w-100">Submit Application <i class="fas fa-paper-plane ms-2"></i></button>
+                <button type="submit" class="btn btn-submit w-100" id="studentSubmitBtn">
+                    <span class="spinner-border spinner-border-sm d-none me-2" role="status" aria-hidden="true"></span>
+                    <span class="btn-text">Submit Application</span>
+                    <i class="fas fa-paper-plane ms-2"></i>
+                </button>
             </form>
         </div>
     </div>
@@ -195,16 +242,76 @@
         setActiveTab('student');
     });
 
-    // Optional: form submission handler (for demo, you can replace with actual AJAX)
-    document.getElementById('sponsorForm')?.addEventListener('submit', function(e) {
-        e.preventDefault();
-        alert('Thank you for your interest in sponsoring BAFAI students! Our team will contact you shortly.');
-        this.reset();
+    document.addEventListener('DOMContentLoaded', function() {
+        const forms = document.querySelectorAll('#sponsorForm, #studentForm');
+
+        forms.forEach(form => {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (!submitBtn) return;
+
+            // Handle form submission
+            form.addEventListener('submit', function(e) {
+                // 1️⃣ Check HTML5 validation – if invalid, do NOT disable button
+                if (!form.checkValidity()) {
+                    // Let the browser show validation messages
+                    return;
+                }
+
+                // 2️⃣ Prevent double submission
+                if (submitBtn.disabled) {
+                    e.preventDefault();
+                    return;
+                }
+
+                // 3️⃣ Disable button and show spinner
+                disableButton(submitBtn);
+            });
+
+            // 4️⃣ Re‑enable button if validation fails on any input
+            form.querySelectorAll('input, textarea, select').forEach(field => {
+                field.addEventListener('invalid', function() {
+                    // Re‑enable the button so user can correct and try again
+                    enableButton(submitBtn);
+                });
+            });
+        });
+
+        // Helper functions
+        function disableButton(btn) {
+            btn.disabled = true;
+            const spinner = btn.querySelector('.spinner-border');
+            const btnText = btn.querySelector('.btn-text');
+            const icon = btn.querySelector('.fas');
+
+            if (spinner) spinner.classList.remove('d-none');
+            if (btnText) btnText.textContent = 'Submitting...';
+            if (icon) icon.style.display = 'none';
+        }
+
+        function enableButton(btn) {
+            btn.disabled = false;
+            const spinner = btn.querySelector('.spinner-border');
+            const btnText = btn.querySelector('.btn-text');
+            const icon = btn.querySelector('.fas');
+
+            if (spinner) spinner.classList.add('d-none');
+            if (btnText) btnText.textContent = btnText.dataset.originalText || 'Submit';
+            if (icon) icon.style.display = 'inline-block';
+        }
+
+        // Store original button text for restoration
+        document.querySelectorAll('.btn-submit').forEach(btn => {
+            const textSpan = btn.querySelector('.btn-text');
+            if (textSpan) {
+                textSpan.dataset.originalText = textSpan.textContent.trim();
+            }
+        });
     });
-    document.getElementById('studentForm')?.addEventListener('submit', function(e) {
-        e.preventDefault();
-        alert('Your sponsorship application has been submitted. We will review and get back to you within 5-7 business days.');
-        this.reset();
+
+    document.addEventListener('click', function(e) {
+        if (e.target.matches('[data-close="alert"]')) {
+            e.target.closest('.custom-alert').remove();
+        }
     });
 </script>
 @endpush

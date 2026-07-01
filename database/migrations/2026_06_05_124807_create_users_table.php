@@ -13,12 +13,16 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+            $table->string('referral_code', 20)->nullable()->unique();
             $table->string('firstname');
             $table->string('lastname');
             $table->string('email')->unique();
             $table->string('password');
             $table->string('country', 2)->nullable();
+            $table->string('phone_primary', 20)->nullable();
+            $table->string('phone_secondary', 20)->nullable();
             $table->unsignedBigInteger('moodle_id')->nullable()->unique();
+            $table->string('referred_by', 20)->nullable();
             $table->timestamps();
         });
     }

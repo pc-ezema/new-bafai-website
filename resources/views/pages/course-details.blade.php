@@ -319,7 +319,7 @@ body {
                             @endphp
                             <img src="{{ $instructorImage }}" class="instructor-avatar" alt="{{ $instructor->firstname }}">
                         @else
-                            <img src="{{ asset('assets/img/avatar-placeholder.jpg') }}" class="instructor-avatar" alt="Instructor">
+                            <img src="{{ asset('assets/img/avatar-placeholder.png') }}" class="instructor-avatar" alt="Instructor">
                         @endif
                         <div>
                             <div class="instructor-name">
@@ -337,7 +337,11 @@ body {
             <div class="col-lg-4">
                 <div class="sidebar-card">
                     <img src="{{ $imageUrl }}" class="img-fluid rounded mb-3" alt="{{ $course->fullname }}">
-                    <div class="course-price">${{ $price }}</div>
+                    @if($price > 0)
+                        <div class="course-price">{{ $currency }} {{ number_format($price, 2) }}</div>
+                    @else
+                        <div class="free-badge">Free</div>
+                    @endif
                     @if($inCart)
                         <a href="{{ route('cart.index') }}" class="btn-enroll w-100">
                             <i class="fas fa-shopping-cart me-2"></i> Go to Cart

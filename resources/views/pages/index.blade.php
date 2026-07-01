@@ -30,7 +30,7 @@
                         <div class="media-thumbnail">
                             <img src="{{ asset('assets/img/bafai-8-1024x683.jpeg') }}" alt="Watch Intro Video">
                             <div class="play-btn">
-                                <a href="https://www.youtube.com/watch?v=1trvO6dqQUI" data-fancybox><i class="fas fa-play"></i></a>
+                                <a href="https://www.youtube.com/watch?v=JmE1HhXTomI" data-fancybox><i class="fas fa-play"></i></a>
                             </div>
                         </div>
                     </div>
@@ -40,7 +40,7 @@
                         </div>
                     </div>
                 </div>
-               <div class="top-courses-carousel" data-aos="fade-left" data-aos-duration="800" data-aos-delay="100">
+                <div class="top-courses-carousel" data-aos="fade-left" data-aos-duration="800" data-aos-delay="100">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h6 class="mb-0"><i class="fas fa-fire"></i> Top Rated Courses</h6>
                         <a href="{{ route('courses') }}" class="small" style="text-decoration: none;">View All <i class="fas fa-arrow-right"></i></a>
@@ -49,7 +49,7 @@
                         <div class="swiper-wrapper">
                             @foreach($topCourses as $course)
                                 @php
-                                    // Image URL
+                                    // Image URL (keep this as is)
                                     if($course->image_hash && $course->image_filename) {
                                         $imageUrl = route('moodle.file', [
                                             'hash' => $course->image_hash,
@@ -58,12 +58,6 @@
                                     } else {
                                         $imageUrl = asset('assets/img/course-placeholder.jpg');
                                     }
-
-                                    // Price (example)
-                                    $price = match($course->id) {
-                                        5 => 199, 6 => 299, 10 => 399, 12 => 249,
-                                        default => 149,
-                                    };
                                 @endphp
                                 <div class="swiper-slide">
                                     <div class="mini-course-card">
@@ -73,7 +67,14 @@
                                         <div class="mini-course-content">
                                             <h6 class="mini-course-title">{{ Str::limit($course->fullname, 40) }}</h6>
                                             <div class="d-flex justify-content-between">
-                                                <span class="mini-course-price">${{ $price }}</span>
+                                                {{-- 🟢 DYNAMIC PRICE FROM CONTROLLER --}}
+                                                <span class="mini-course-price">
+                                                    @if($course->price > 0)
+                                                        {{ $course->currency }} {{ number_format($course->price, 2) }}
+                                                    @else
+                                                        Free
+                                                    @endif
+                                                </span>
                                                 <a href="{{ route('course-details', $course->id) }}" class="btn btn-sm-custom">
                                                     View Details
                                                 </a>
@@ -99,6 +100,9 @@
             <div class="col-lg-6" data-aos="fade-right" data-aos-duration="1000">
                 <div class="about-image">
                     <img src="{{ asset('assets/img/1000265302.jpg') }}" alt="About BAFAI" class="img-fluid">
+                    <div class="play-btn">
+                        <a href="https://www.youtube.com/watch?v=Ja-v4QQAA-8" data-fancybox><i class="fas fa-play"></i></a>
+                    </div>
                 </div>
             </div>
             <div class="col-lg-6" data-aos="fade-left" data-aos-duration="800">
@@ -224,8 +228,8 @@
                         <h2 class="display-5 fw-bold mb-4">Start Your <span class="gradient-text">Course Today!</span></h2>
                         <p class="lead mb-4">At BAFAI, we're not just teaching Artificial Intelligence, we're building a movement of innovators, problem-solvers, and leaders.</p>
                         <div class="d-flex flex-wrap gap-3">
-                            <a href="#" class="btn btn-primary-custom btn-lg">Join Cohort <i class="fas fa-arrow-right ms-2"></i></a>
-                            <a href="#" class="btn btn-outline-custom btn-lg">Sign In <i class="fas fa-user ms-2"></i></a>
+                            <a href="{{ url('/register') }}" class="btn btn-primary-custom btn-lg">Join Cohort <i class="fas fa-arrow-right ms-2"></i></a>
+                            <a href="https://learn.bafai.ai/login/index.php" class="btn btn-outline-custom btn-lg">Sign In <i class="fas fa-user ms-2"></i></a>
                         </div>
                     </div>
                 </div>
@@ -327,7 +331,7 @@
                         <div class="testimonial-avatar">OP</div>
                         <div>
                             <h5>Okurame Patricia Efeoghene</h5>
-                            <p>Track 2 – Medical Student</p>
+                            <p>Certificate in AI Task Management – Medical Student</p>
                             <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
                         </div>
                     </div>
@@ -341,7 +345,7 @@
                         <div class="testimonial-avatar">JW</div>
                         <div>
                             <h5>Judah Wisdom Abiola</h5>
-                            <p>Track 2 – Head of Marketing</p>
+                            <p>Certificate in AI Task Management – Head of Marketing</p>
                             <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
                         </div>
                     </div>
@@ -355,7 +359,7 @@
                         <div class="testimonial-avatar">TM</div>
                         <div>
                             <h5>Tamara Margaret Adedapo</h5>
-                            <p>Track 2 – AI Enthusiast</p>
+                            <p>Certificate in AI Task Management – AI Enthusiast</p>
                             <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
                         </div>
                     </div>

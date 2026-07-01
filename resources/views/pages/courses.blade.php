@@ -395,15 +395,21 @@ body { font-size: 15px; line-height: 1.5; background: var(--gray-light); }
                             </div>
                             <div class="course-price">
                                 @php
-                                    $price = match($course->id) {
-                                        5 => 199,
-                                        6 => 299,
-                                        10 => 399,
-                                        12 => 249,
-                                        default => 149,
-                                    };
+                                    // Fetch the actual price from the enrolment plugin
+                                    $enrolment = DB::table('mdlhpdl_enrol')
+                                        ->where('courseid', $course->id)
+                                        ->where('enrol', 'fee') // or 'stripe'
+                                        ->where('status', 1)
+                                        ->first();
+
+                                    $price = $enrolment ? floatval($enrolment->cost) : 0;
+                                    $currency = $enrolment ? $enrolment->currency : 'USD';
                                 @endphp
-                                ${{ $price }} 
+                                @if($price > 0)
+                                    {{ $currency }} {{ number_format($price, 2) }}
+                                @else
+                                    Free
+                                @endif
                                 <a href="{{ route('course-details', $course->id) }}" class="btn-enroll">
                                     View Details <i class="fas fa-arrow-right ms-1"></i>
                                 </a>

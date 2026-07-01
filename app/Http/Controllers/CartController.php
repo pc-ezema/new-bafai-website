@@ -19,17 +19,28 @@ class CartController extends Controller
         $total = 0;
 
         if (!empty($cart)) {
-            // Fetch course details from Moodle DB
+            $courseIds = array_keys($cart);
+
+            // Fetch course details
             $courses = DB::table('mdlhpdl_course')
-                ->whereIn('id', array_keys($cart))
+                ->whereIn('id', $courseIds)
                 ->select('id', 'fullname', 'summary', 'category')
                 ->get();
 
-            // Add price (you can use your price logic)
+            // 🔽 Fetch ALL enrolments for these courses in ONE query (efficient!)
+            $enrolments = DB::table('mdlhpdl_enrol')
+                ->whereIn('courseid', $courseIds)
+                ->where('enrol', 'fee') // Change to 'stripe' if needed
+                ->where('status', 1)
+                ->get()
+                ->keyBy('courseid'); // Key the collection by course ID for easy lookup
+
+            // Attach price & currency to each course
             foreach ($courses as $course) {
-                $price = $this->getCoursePrice($course->id);
-                $course->price = $price;
-                $total += $price;
+                $enrol = $enrolments->get($course->id);
+                $course->price = $enrol ? floatval($enrol->cost) : 0;
+                $course->currency = $enrol ? $enrol->currency : 'USD';
+                $total += $course->price;
             }
         }
 
@@ -141,7 +152,7 @@ class CartController extends Controller
                     'idnumber'          => $cohortName,
                     'contextid'         => $systemContextId,
                     'description'       => 'Auto‑generated cohort for ' . $course->shortname . ' starting ' . now()->toDateString(),
-                    'descriptionformat' => 1,   // FORMAT_HTML = 1
+                    'descriptionformat' => 1,
                     'visible'           => 1,
                     'component'         => '',
                     'timecreated'       => $now,
@@ -175,25 +186,17 @@ class CartController extends Controller
     }
 
     /**
-     * Helper: Get course price (same logic as in your controller).
+     * Clear the entire cart.
      */
-    private function getCoursePrice($courseId)
-    {
-        return match($courseId) {
-            5 => 199,
-            6 => 299,
-            10 => 399,
-            12 => 249,
-            default => 149,
-        };
-    }
-
     public function clear()
     {
         session()->forget('cart');
         return redirect()->route('cart.index')->with('success', 'Cart cleared successfully.');
     }
 
+    /**
+     * Show checkout page.
+     */
     public function process(Request $request)
     {
         $cart = session()->get('cart', []);
@@ -201,15 +204,27 @@ class CartController extends Controller
             return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
         }
 
+        $courseIds = array_keys($cart);
+
         // Fetch course details
         $courses = DB::table('mdlhpdl_course')
-            ->whereIn('id', array_keys($cart))
+            ->whereIn('id', $courseIds)
             ->get();
 
-        // Attach price to each course and calculate total
+        // 🔽 Fetch ALL enrolments for these courses in ONE query
+        $enrolments = DB::table('mdlhpdl_enrol')
+            ->whereIn('courseid', $courseIds)
+            ->where('enrol', 'fee') // Change to 'stripe' if needed
+            ->where('status', 1)
+            ->get()
+            ->keyBy('courseid');
+
+        // Attach price & currency to each course and calculate total
         $total = 0;
         foreach ($courses as $course) {
-            $course->price = $this->getCoursePrice($course->id);
+            $enrol = $enrolments->get($course->id);
+            $course->price = $enrol ? floatval($enrol->cost) : 0;
+            $course->currency = $enrol ? $enrol->currency : 'USD';
             $total += $course->price;
         }
 

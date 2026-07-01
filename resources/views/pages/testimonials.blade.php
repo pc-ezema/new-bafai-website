@@ -24,7 +24,7 @@
             <div class="testimonial-card" data-aos="fade-up" data-aos-duration="600" data-aos-delay="100">
                 <div class="testimonial-avatar">OP</div>
                 <h3 class="testimonial-name">Okurame Patricia Efeoghene</h3>
-                <div class="testimonial-track">Track 2 – Medical Student</div>
+                <div class="testimonial-track">Certificate in AI Task Management – Medical Student</div>
                 <div class="testimonial-stars">
                     <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                 </div>
@@ -35,7 +35,7 @@
             <div class="testimonial-card" data-aos="fade-up" data-aos-duration="600" data-aos-delay="150">
                 <div class="testimonial-avatar">JW</div>
                 <h3 class="testimonial-name">Judah Wisdom Abiola</h3>
-                <div class="testimonial-track">Track 2 – Head of Marketing</div>
+                <div class="testimonial-track">Certificate in AI Task Management – Head of Marketing</div>
                 <div class="testimonial-stars">
                     <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                 </div>
@@ -46,7 +46,7 @@
             <div class="testimonial-card" data-aos="fade-up" data-aos-duration="600" data-aos-delay="200">
                 <div class="testimonial-avatar">TM</div>
                 <h3 class="testimonial-name">Tamara Margaret Adedapo</h3>
-                <div class="testimonial-track">Track 2 – AI Enthusiast</div>
+                <div class="testimonial-track">Certificate in AI Task Management – AI Enthusiast</div>
                 <div class="testimonial-stars">
                     <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                 </div>
@@ -57,7 +57,7 @@
             <div class="testimonial-card" data-aos="fade-up" data-aos-duration="600" data-aos-delay="250">
                 <div class="testimonial-avatar">AO</div>
                 <h3 class="testimonial-name">Adeyemi Oluwarinumi Olajumoke</h3>
-                <div class="testimonial-track">Track 1 – AI Beginner</div>
+                <div class="testimonial-track">Certificate in AI Fundamentals – AI Beginner</div>
                 <div class="testimonial-stars">
                     <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                 </div>
@@ -68,18 +68,18 @@
             <div class="testimonial-card" data-aos="fade-up" data-aos-duration="600" data-aos-delay="300">
                 <div class="testimonial-avatar">OB</div>
                 <h3 class="testimonial-name">Oni Boluwatife</h3>
-                <div class="testimonial-track">Track 1 – AI Explorer</div>
+                <div class="testimonial-track">Certificate in AI Fundamentals – AI Explorer</div>
                 <div class="testimonial-stars">
                     <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                 </div>
-                <p class="testimonial-text">Initially, I thought I might have difficulty understanding the concept of AI, but after undergoing the track 1 course from BAFAI, I became more curious to learn more about what AI is about and how we can use it in different sectors.</p>
+                <p class="testimonial-text">Initially, I thought I might have difficulty understanding the concept of AI, but after undergoing the Certificate in AI Fundamentals course from BAFAI, I became more curious to learn more about what AI is about and how we can use it in different sectors.</p>
             </div>
 
             <!-- Testimonial 6: Oluwagbile Praise -->
             <div class="testimonial-card" data-aos="fade-up" data-aos-duration="600" data-aos-delay="350">
                 <div class="testimonial-avatar">OP</div>
                 <h3 class="testimonial-name">Oluwagbile Praise</h3>
-                <div class="testimonial-track">Track 1 – AI Student</div>
+                <div class="testimonial-track">Certificate in AI Fundamentals – AI Student</div>
                 <div class="testimonial-stars">
                     <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                 </div>
