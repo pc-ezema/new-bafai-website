@@ -234,7 +234,7 @@ HTML,
                 'published_at' => Carbon::parse('2026-07-17'),
                 'is_published' => true,
                 'views' => 0,
-                'featured_image' => 'BAFAI-X-RenewCap-blog.jpg',
+                'featured_image' => 'BAFAI-X-Renewcap-blog.jpg',
             ],
         ];
 
