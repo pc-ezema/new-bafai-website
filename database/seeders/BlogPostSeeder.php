@@ -193,6 +193,49 @@ HTML,
                 'views' => 0,
                 'featured_image' => 'BAFAI-X-Active-Tech-Partnership.jpg',
             ],
+            [
+                'title' => 'Building Smarter Energy Futures: How BAFAI and RenewCap Are Advancing AI in Renewable Energy',
+                'content' => <<<HTML
+<p>The future of Africa's energy sector will not be shaped by infrastructure alone. It will also be shaped by the people who know how to harness Artificial Intelligence to solve complex challenges, improve operational efficiency, and accelerate innovation.</p>
+
+<p>That is why Bloom Academy for Artificial Intelligence (BAFAI) is pleased to begin working with RenewCap to explore how AI capability can strengthen Africa's growing renewable energy ecosystem.</p>
+
+<h2>Bringing AI and Renewable Energy Together</h2>
+
+<p>As a clean energy financing company, RenewCap is helping businesses and households overcome one of the biggest barriers to renewable energy adoption&mdash;access to affordable financing. By making clean energy solutions more accessible, RenewCap is contributing to a more sustainable and resilient future.</p>
+
+<p>BAFAI shares a complementary mission. Our focus is preparing Africa's workforce with practical AI skills that can be applied across industries, enabling professionals and organisations to work smarter, make better decisions, and build systems that are ready for the future.</p>
+
+<p>This collaboration creates an opportunity to bring those two missions together.</p>
+
+<h2>Empowering Organisations with Practical AI Skills</h2>
+
+<p>By combining RenewCap's work within the renewable energy sector with BAFAI's expertise in practical AI education, both organisations will explore ways to equip founders, professionals, and businesses with the knowledge to integrate AI into everyday operations and decision-making.</p>
+
+<p>Beyond learning how to use AI tools, the emphasis is on helping organisations build AI-enabled systems that improve productivity, streamline workflows, and support sustainable growth.</p>
+
+<p>This aligns closely with BAFAI's Practical AI Framework for SMEs, which focuses on building business clarity first before introducing AI into real operational workflows.</p>
+
+<h2>Preparing Africa for the Energy Transition</h2>
+
+<p>As Africa continues its transition towards cleaner energy, developing AI capability alongside renewable infrastructure will become increasingly important.</p>
+
+<p>This collaboration reflects a shared belief that sustainable development depends not only on technology, but also on empowering people with the skills to use it effectively.</p>
+
+<h2>Building a Future-Ready Workforce</h2>
+
+<p>Together, BAFAI and RenewCap are contributing to building a workforce that is ready for both the energy transition and the AI economy.</p>
+
+<p>Through practical AI education and industry collaboration, both organisations aim to support businesses, professionals, and innovators in adopting intelligent solutions that drive productivity, sustainability, and long-term economic growth across Africa.</p>
+
+<p>For more information about BAFAI programmes and learning opportunities, visit <a href="https://bafai.ai">https://bafai.ai</a></p>
+HTML,
+                'author' => 'BAFAI',
+                'published_at' => Carbon::parse('2026-06-17'),
+                'is_published' => true,
+                'views' => 0,
+                'featured_image' => 'BAFAI-X-RenewCap-blog.jpg',
+            ],
         ];
 
         foreach ($posts as $post) {
