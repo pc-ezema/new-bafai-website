@@ -231,7 +231,7 @@ HTML,
 <p>For more information about BAFAI programmes and learning opportunities, visit <a href="https://bafai.ai">https://bafai.ai</a></p>
 HTML,
                 'author' => 'BAFAI',
-                'published_at' => Carbon::parse('2026-06-17'),
+                'published_at' => Carbon::parse('2026-07-17'),
                 'is_published' => true,
                 'views' => 0,
                 'featured_image' => 'BAFAI-X-RenewCap-blog.jpg',
