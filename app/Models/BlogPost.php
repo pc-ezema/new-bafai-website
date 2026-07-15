@@ -31,8 +31,7 @@ class BlogPost extends Model
     // Scope for published posts
     public function scopePublished($query)
     {
-        return $query->where('is_published', true)
-                     ->where('published_at', '<=', now());
+        return $query->where('is_published', true);
     }
 
     // Get excerpt if not set, auto-generate from content
