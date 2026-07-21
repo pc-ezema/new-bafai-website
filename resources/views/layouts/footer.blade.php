@@ -33,10 +33,10 @@
                                     <div class="footer-widget footer-menu">
                                         <h3 class="footer-title">About</h3>
                                         <ul>
-                                            <li><a href="{{ url('/about') }}">About Us</a></li>
+                                            <li><a href="{{ url('/about-us') }}">About Us</a></li>
                                             <li><a href="{{ url('/courses') }}">Courses</a></li>
-                                            <li><a href="{{ url('/about') }}#WhoWeAre">Who We Are</a></li>
-                                            <li><a href="{{ url('/about') }}#WhyLearnWithBAFAI">Why Learn with BAFAI?</a></li>
+                                            <li><a href="{{ url('/about-us') }}#WhoWeAre">Who We Are</a></li>
+                                            <li><a href="{{ url('/about-us') }}#WhyLearnWithBAFAI">Why Learn with BAFAI?</a></li>
                                         </ul>
                                     </div>
                                 </div>

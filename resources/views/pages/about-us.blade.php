@@ -47,7 +47,7 @@
                 <li>Insight into global and local AI career pathways</li>
             </ul>
             <div class="text-center mt-4">
-                <a href="#" class="btn btn-primary-custom">Get Started <i class="fas fa-arrow-right ms-2"></i></a>
+                <a href="{{ url('/register') }}" class="btn btn-primary-custom">Get Started <i class="fas fa-arrow-right ms-2"></i></a>
             </div>
         </div>
     </div>
@@ -95,28 +95,28 @@
         <div class="stats-grid">
             <div class="stat-item" data-aos="zoom-in" data-aos-duration="600" data-aos-delay="100">
                 <div class="stat-icon">
-                    <img src="{{ asset('assets/img/icons/course-icon.svg') }}" alt="Online Courses">
+                    <img src="{{ asset('assets/img/online-course.png') }}" alt="Online Courses">
                 </div>
                 <div class="stat-number">10K</div>
                 <div class="stat-label">Online Courses</div>
             </div>
             <div class="stat-item" data-aos="zoom-in" data-aos-duration="600" data-aos-delay="200">
                 <div class="stat-icon">
-                    <img src="{{ asset('assets/img/icons/tutor-icon.svg') }}" alt="Expert Tutors">
+                    <img src="{{ asset('assets/img/expert-tutors.png') }}" alt="Expert Tutors">
                 </div>
                 <div class="stat-number">200+</div>
                 <div class="stat-label">Expert Tutors</div>
             </div>
             <div class="stat-item" data-aos="zoom-in" data-aos-duration="600" data-aos-delay="300">
                 <div class="stat-icon">
-                    <img src="{{ asset('assets/img/icons/certified-icon.svg') }}" alt="Certified Courses">
+                    <img src="{{ asset('assets/img/expert-tutors.png') }}" alt="Certified Courses">
                 </div>
                 <div class="stat-number">6K+</div>
                 <div class="stat-label">Certified Courses</div>
             </div>
             <div class="stat-item" data-aos="zoom-in" data-aos-duration="600" data-aos-delay="400">
                 <div class="stat-icon">
-                    <img src="{{ asset('assets/img/icons/students-icon.svg') }}" alt="Online Students">
+                    <img src="{{ asset('assets/img/online-students.png') }}" alt="Online Students">
                 </div>
                 <div class="stat-number">60K+</div>
                 <div class="stat-label">Online Students</div>
