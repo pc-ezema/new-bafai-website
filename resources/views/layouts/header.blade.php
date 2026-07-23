@@ -60,14 +60,6 @@
                     <li><a href="{{ url('/testimonials') }}">Testimonials</a></li>
                 </ul>
             </li>
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fas fa-globe"></i> Language
-                </a>
-                <ul class="dropdown-menu" aria-labelledby="languageDropdown" id="google_translate_element">
-                    <!-- Google Translate will render here -->
-                </ul>
-            </li>
         </ul>
         <div class="mobile-auth">
             @guest
@@ -128,14 +120,44 @@
                                 <li><a href="{{ url('/testimonials') }}"><i class="fas fa-star"></i> Testimonials</a></li>
                             </ul>
                         </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-globe"></i> Language
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="languageDropdown" id="google_translate_element">
-                                <!-- Google Translate will render here -->
+                        <li class="nav-item language-dropdown">
+
+                            <button id="languageToggle" class="language-btn">
+                                <i class="fas fa-globe"></i>
+                                <span id="currentLanguage">English</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+
+                            <ul class="language-menu">
+                                <li data-lang="af">🇿🇦 Afrikaans</li>
+                                <li data-lang="sq">🇦🇱 Albanian</li>
+                                <li data-lang="ar">🇸🇦 العربية</li>
+                                <li data-lang="hy">🇦🇲 Armenian</li>
+                                <li data-lang="az">🇦🇿 Azerbaijani</li>
+                                <li data-lang="bn">🇧🇩 Bengali</li>
+                                <li data-lang="zh-CN">🇨🇳 中文 (简体)</li>
+                                <li data-lang="zh-TW">🇹🇼 中文 (繁體)</li>
+                                <li data-lang="nl">🇳🇱 Dutch</li>
+                                <li data-lang="en">🇺🇸 English</li>
+                                <li data-lang="fr">🇫🇷 Français</li>
+                                <li data-lang="de">🇩🇪 Deutsch</li>
+                                <li data-lang="hi">🇮🇳 हिन्दी</li>
+                                <li data-lang="it">🇮🇹 Italiano</li>
+                                <li data-lang="ja">🇯🇵 日本語</li>
+                                <li data-lang="ko">🇰🇷 한국어</li>
+                                <li data-lang="pt">🇵🇹 Português</li>
+                                <li data-lang="ru">🇷🇺 Русский</li>
+                                <li data-lang="es">🇪🇸 Español</li>
+                                <li data-lang="sw">🇰🇪 Kiswahili</li>
+                                <li data-lang="tr">🇹🇷 Türkçe</li>
+                                <li data-lang="uk">🇺🇦 Українська</li>
+                                <li data-lang="ur">🇵🇰 اردو</li>
+                                <li data-lang="vi">🇻🇳 Tiếng Việt</li>
                             </ul>
+
                         </li>
+
+                        <div id="google_translate_element"></div>
                     </ul>
 
                     <!-- Header Actions -->

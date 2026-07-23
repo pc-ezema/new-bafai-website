@@ -171,7 +171,7 @@
 
     
     function updateCartCount() {
-        cfetch('/cart-count')
+        fetch('/cart-count')
             .then(response => {
                 if (!response.ok) throw new Error('Network error');
                 return response.json();
@@ -233,6 +233,43 @@
 
         scrollBtn.addEventListener('click', function() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    });
+
+    const toggle = document.getElementById("languageToggle");
+    const menu = document.querySelector(".language-menu");
+
+    toggle.addEventListener("click",()=>{
+        menu.classList.toggle("show");
+    });
+
+    const saved=localStorage.getItem("selectedLanguage");
+
+    if(saved){
+        const selected=document.querySelector('[data-lang="'+saved+'"]');
+        if(selected){
+            document.getElementById("currentLanguage").innerHTML=selected.innerHTML;
+        }
+    }
+
+    document.addEventListener("click",function(e){
+        if(!e.target.closest(".language-dropdown")){
+            menu.classList.remove("show");
+        }
+    });
+
+    function changeLanguage(lang){
+        document.cookie="googtrans=/en/"+lang+";path=/";
+        document.cookie="googtrans=/en/"+lang+";domain="+location.hostname+";path=/";
+        localStorage.setItem("selectedLanguage",lang);
+        location.reload();
+    }
+
+    document.querySelectorAll(".language-menu li").forEach(item=>{
+        item.addEventListener("click",function(){
+            const lang=this.dataset.lang;
+            document.getElementById("currentLanguage").innerHTML=this.innerHTML;
+            changeLanguage(lang);
         });
     });
 

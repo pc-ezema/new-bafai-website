@@ -117,9 +117,6 @@
         </div>
     </div>
 
-    <!-- Google Translate Widget -->
-    <div id="google_translate_element" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;"></div>
-
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
@@ -142,18 +139,15 @@
     <script src="{{ url('assets/js/main.js') }}"></script>
 
     <script type="text/javascript">
-        function googleTranslateElementInit() {
+        function googleTranslateElementInit(){
             new google.translate.TranslateElement({
-                pageLanguage: 'en',
-                includedLanguages: 'en,fr,es,ar,zh-CN,de,it,pt,ru,ja,ko,hi,bn,ur,id,ms,th,vi,pl,tr,fa,he,sv,no,da,fi,el,nl,cs,ro,hu,sk,uk,ca,eu,gl,hr,sr,sl,et,lv,lt,is,sw,am,tl,ne,ta,te,ml,kn,gu,pa,si,my,km,lo,mn,ka,hy,az,uz,ky,tg,be,bs,az,la',
-                layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
-                autoDisplay: false
-            }, 'google_translate_element');
+                pageLanguage:'en',
+                autoDisplay:false
+            },'google_translate_element');
         }
     </script>
 
-    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
-    </script>
+    <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
     @stack('scripts')
     </body>
