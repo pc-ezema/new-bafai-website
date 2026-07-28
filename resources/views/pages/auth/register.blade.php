@@ -319,10 +319,11 @@
                                 <label for="course_interest">Course Interest</label>
                                 <select name="course_interest" id="course_interest" class="form-control @error('course_interest') is-invalid @enderror">
                                     <option value="">Select a course you're interested in</option>
-                                    @foreach($courses as $course)
-                                    <option value="{{ $course->id }}" {{ old('course_interest') == $course->id ? 'selected' : '' }}>
-                                        {{ $course->fullname }}
-                                    </option>
+                                   @foreach($courses as $course)
+                                        <option value="{{ $course->fullname }}"
+                                            {{ old('course_interest') == $course->fullname ? 'selected' : '' }}>
+                                            {{ $course->fullname }}
+                                        </option>
                                     @endforeach
                                 </select>
                                 @error('course_interest')
