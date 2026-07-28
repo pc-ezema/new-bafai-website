@@ -209,19 +209,20 @@ class HomePageController extends Controller
     public function courses(Request $request)
     {
         $selectedCategory = $request->input('category');
-        
+
         // Build the base query – joining the enrol table to get the price
         $query = Course::visible()
             ->where('mdlhpdl_course.id', '>', 1) // exclude site course
             ->leftJoin('mdlhpdl_course_categories', 'mdlhpdl_course.category', '=', 'mdlhpdl_course_categories.id')
-            ->leftJoin('mdlhpdl_context', function($join) {
+            ->leftJoin('mdlhpdl_context', function ($join) {
                 $join->on('mdlhpdl_context.instanceid', '=', 'mdlhpdl_course.id')
                     ->where('mdlhpdl_context.contextlevel', '=', 50);
             })
-            ->leftJoin('mdlhpdl_files', function($join) {
+            ->leftJoin('mdlhpdl_files', function ($join) {
                 $join->on('mdlhpdl_files.contextid', '=', 'mdlhpdl_context.id')
                     ->whereRaw('mdlhpdl_files.id = (
-                        SELECT f2.id FROM mdlhpdl_files f2
+                        SELECT f2.id
+                        FROM mdlhpdl_files f2
                         WHERE f2.contextid = mdlhpdl_context.id
                         AND f2.component = "course"
                         AND f2.filearea = "overviewfiles"
@@ -230,11 +231,10 @@ class HomePageController extends Controller
                         LIMIT 1
                     )');
             })
-            // 🔽 ADD THIS JOIN TO GET THE PRICE
-            ->leftJoin('mdlhpdl_enrol', function($join) {
+            ->leftJoin('mdlhpdl_enrol', function ($join) {
                 $join->on('mdlhpdl_enrol.courseid', '=', 'mdlhpdl_course.id')
-                    ->where('mdlhpdl_enrol.enrol', '=', 'fee') // or 'payrol, stripe'
-                    ->where('mdlhpdl_enrol.status', '=', 1);      // only active enrolments
+                    ->where('mdlhpdl_enrol.enrol', '=', 'fee')
+                    ->where('mdlhpdl_enrol.status', '=', 1);
             })
             ->select(
                 'mdlhpdl_course.*',
@@ -242,29 +242,25 @@ class HomePageController extends Controller
                 'mdlhpdl_context.id as context_id',
                 'mdlhpdl_files.filename as image_filename',
                 'mdlhpdl_files.contenthash as image_hash',
-                // 🔽 SELECT THE PRICE AND CURRENCY
                 'mdlhpdl_enrol.cost as price',
                 'mdlhpdl_enrol.currency as currency'
             );
-        
+
         // Apply category filter
         if ($selectedCategory && is_numeric($selectedCategory)) {
             $query->where('mdlhpdl_course.category', $selectedCategory);
         }
-        
-        // Cache the results for 1 hour (adjust as needed)
-        $cacheKey = 'courses_page_' . ($selectedCategory ?? 'all') . '_' . $request->get('page', 1);
-        $courses = Cache::remember($cacheKey, 3600, function() use ($query) {
-            return $query->orderBy('mdlhpdl_course.sortorder', 'desc')
-                         ->orderBy('mdlhpdl_course.id', 'desc')
-                         ->paginate(9);
-        });
-        
+
+        // Fetch directly from the database (no cache)
+        $courses = $query->orderBy('mdlhpdl_course.sortorder', 'desc')
+                        ->orderBy('mdlhpdl_course.id', 'desc')
+                        ->paginate(9);
+
         // Get categories for the sidebar filter
         $categories = CourseCategory::where('visible', 1)
             ->orderBy('sortorder')
             ->get();
-        
+
         return view('pages.courses', compact('courses', 'categories', 'selectedCategory'));
     }
     
@@ -273,101 +269,103 @@ class HomePageController extends Controller
      */
     public function courseDetails($id)
     {
-        $cacheKey = 'course_details_' . $id;
-        
-        $courseData = Cache::remember($cacheKey, 3600, function() use ($id) {
-            // Main course query
-            $course = Course::visible()
-                ->where('mdlhpdl_course.id', $id)
-                ->leftJoin('mdlhpdl_course_categories', 'mdlhpdl_course.category', '=', 'mdlhpdl_course_categories.id')
-                ->leftJoin('mdlhpdl_context', function($join) {
-                    $join->on('mdlhpdl_context.instanceid', '=', 'mdlhpdl_course.id')
-                        ->where('mdlhpdl_context.contextlevel', '=', 50);
-                })
-                ->leftJoin('mdlhpdl_files', function($join) {
-                    $join->on('mdlhpdl_files.contextid', '=', 'mdlhpdl_context.id')
-                        ->where('mdlhpdl_files.component', '=', 'course')
-                        ->where('mdlhpdl_files.filearea', '=', 'overviewfiles')
-                        ->where('mdlhpdl_files.filename', '!=', '.');
-                })
-                // JOIN TO GET THE PRICE
-                ->leftJoin('mdlhpdl_enrol', function($join) {
-                    $join->on('mdlhpdl_enrol.courseid', '=', 'mdlhpdl_course.id')
-                        ->where('mdlhpdl_enrol.enrol', '=', 'fee') // Change to 'stripe' if needed
-                        ->where('mdlhpdl_enrol.status', '=', 1);
-                })
-                ->select(
-                    'mdlhpdl_course.*',
-                    'mdlhpdl_course_categories.name as category_name',
-                    'mdlhpdl_context.id as context_id',
-                    'mdlhpdl_files.filename as image_filename',
-                    'mdlhpdl_files.contenthash as image_hash',
-                    'mdlhpdl_enrol.cost as price',
-                    'mdlhpdl_enrol.currency as currency'
-                )
-                ->first();
-            
-            // If course not found, abort
-            if (!$course) {
-                abort(404, 'Course not found');
-            }
-            
-            // Instructor – safe handling
-            $instructor = null;
-            if ($course->creatorid) {
-                try {
-                    // Use the correct table name – change this to whatever your actual user table is
-                    $userTable = 'mdlhpdl_user';  // ← adjust this
-                    $instructor = DB::table($userTable)
-                        ->where('id', $course->creatorid)
-                        ->select('id', 'firstname', 'lastname', 'email', 'picture', 'imagealt')
-                        ->first();
-                } catch (\Illuminate\Database\QueryException $e) {
-                    // Log error but don't break the page
-                    Log::error('Failed to fetch instructor: ' . $e->getMessage());
-                }
-            }
-            
-            // Sections
-            $sections = DB::table('mdlhpdl_course_sections')
-                ->where('course', $course->id)
-                ->where('visible', 1)
-                ->orderBy('section', 'asc')
-                ->get(['id', 'name', 'summary', 'section']);
-            
-            // Ratings (optional, use fallbacks if table missing)
-            $avgRating = 4.8;
-            $ratingCount = 245;
+        // Main course query
+        $course = Course::visible()
+            ->where('mdlhpdl_course.id', $id)
+            ->leftJoin('mdlhpdl_course_categories', 'mdlhpdl_course.category', '=', 'mdlhpdl_course_categories.id')
+            ->leftJoin('mdlhpdl_context', function ($join) {
+                $join->on('mdlhpdl_context.instanceid', '=', 'mdlhpdl_course.id')
+                    ->where('mdlhpdl_context.contextlevel', '=', 50);
+            })
+            ->leftJoin('mdlhpdl_files', function ($join) {
+                $join->on('mdlhpdl_files.contextid', '=', 'mdlhpdl_context.id')
+                    ->where('mdlhpdl_files.component', '=', 'course')
+                    ->where('mdlhpdl_files.filearea', '=', 'overviewfiles')
+                    ->where('mdlhpdl_files.filename', '!=', '.');
+            })
+            ->leftJoin('mdlhpdl_enrol', function ($join) {
+                $join->on('mdlhpdl_enrol.courseid', '=', 'mdlhpdl_course.id')
+                    ->where('mdlhpdl_enrol.enrol', '=', 'fee')
+                    ->where('mdlhpdl_enrol.status', '=', 1);
+            })
+            ->select(
+                'mdlhpdl_course.*',
+                'mdlhpdl_course_categories.name as category_name',
+                'mdlhpdl_context.id as context_id',
+                'mdlhpdl_files.filename as image_filename',
+                'mdlhpdl_files.contenthash as image_hash',
+                'mdlhpdl_enrol.cost as price',
+                'mdlhpdl_enrol.currency as currency'
+            )
+            ->first();
+
+        if (!$course) {
+            abort(404, 'Course not found');
+        }
+
+        // Instructor
+        $instructor = null;
+        if ($course->creatorid) {
             try {
-                $avgRating = DB::table('mdlhpdl_rating')
-                    ->where('contextid', $course->context_id)
-                    ->where('ratingarea', 'course')
-                    ->avg('rating');
-                $ratingCount = DB::table('mdlhpdl_rating')
-                    ->where('contextid', $course->context_id)
-                    ->where('ratingarea', 'course')
-                    ->count();
-                $avgRating = $avgRating ? round($avgRating, 1) : 4.8;
-                $ratingCount = $ratingCount ?: 245;
-            } catch (\Exception $e) {
-                // Ratings table might not exist – keep defaults
+                $instructor = DB::table('mdlhpdl_user')
+                    ->where('id', $course->creatorid)
+                    ->select('id', 'firstname', 'lastname', 'email', 'picture', 'imagealt')
+                    ->first();
+            } catch (\Illuminate\Database\QueryException $e) {
+                Log::error('Failed to fetch instructor: ' . $e->getMessage());
             }
-            
-            // Enrollment URL
-            $moodleUrl = config('app.moodle_base_url', 'https://your-moodle.com');
-            $enrollUrl = $moodleUrl . '/course/view.php?id=' . $course->id;
+        }
 
-            $price = $course->price ? floatval($course->price) : 0;
-            $currency = $course->currency ?? 'USD';
-            
-            return compact('course', 'instructor', 'sections', 'avgRating', 'ratingCount', 'enrollUrl', 'price', 'currency');
-        });
+        // Sections
+        $sections = DB::table('mdlhpdl_course_sections')
+            ->where('course', $course->id)
+            ->where('visible', 1)
+            ->orderBy('section', 'asc')
+            ->get(['id', 'name', 'summary', 'section']);
 
-        // Add dynamic cart check after cache (always fresh)
+        // Ratings
+        $avgRating = 4.8;
+        $ratingCount = 245;
+
+        try {
+            $avgRating = DB::table('mdlhpdl_rating')
+                ->where('contextid', $course->context_id)
+                ->where('ratingarea', 'course')
+                ->avg('rating');
+
+            $ratingCount = DB::table('mdlhpdl_rating')
+                ->where('contextid', $course->context_id)
+                ->where('ratingarea', 'course')
+                ->count();
+
+            $avgRating = $avgRating ? round($avgRating, 1) : 4.8;
+            $ratingCount = $ratingCount ?: 245;
+        } catch (\Exception $e) {
+            // Keep default values
+        }
+
+        // Enrollment URL
+        $moodleUrl = config('app.moodle_base_url', 'https://your-moodle.com');
+        $enrollUrl = $moodleUrl . '/course/view.php?id=' . $course->id;
+
+        $price = $course->price ? (float) $course->price : 0;
+        $currency = $course->currency ?? 'USD';
+
+        // Cart check (always fresh)
         $cart = session()->get('cart', []);
-        $courseData['inCart'] = isset($cart[$courseData['course']->id]);
-        
-        return view('pages.course-details', $courseData);
+        $inCart = isset($cart[$course->id]);
+
+        return view('pages.course-details', compact(
+            'course',
+            'instructor',
+            'sections',
+            'avgRating',
+            'ratingCount',
+            'enrollUrl',
+            'price',
+            'currency',
+            'inCart'
+        ));
     }
     
     /**
@@ -464,8 +462,30 @@ class HomePageController extends Controller
 
     public function showRegistrationForm()
     {
+        $courses = Course::visible()
+            ->where('mdlhpdl_course.id', '>', 1)
+            ->leftJoin('mdlhpdl_course_categories', 'mdlhpdl_course.category', '=', 'mdlhpdl_course_categories.id')
+            ->leftJoin('mdlhpdl_context', function($join) {
+                $join->on('mdlhpdl_context.instanceid', '=', 'mdlhpdl_course.id')
+                    ->where('mdlhpdl_context.contextlevel', '=', 50);
+            })
+            ->leftJoin('mdlhpdl_files', function($join) {
+                $join->on('mdlhpdl_files.contextid', '=', 'mdlhpdl_context.id')
+                    ->where('mdlhpdl_files.component', '=', 'course')
+                    ->where('mdlhpdl_files.filearea', '=', 'overviewfiles')
+                    ->where('mdlhpdl_files.filename', '!=', '.');
+            })
+            ->select(
+                'mdlhpdl_course.*',
+                'mdlhpdl_course_categories.name as category_name',
+                'mdlhpdl_files.filename as image_filename',
+                'mdlhpdl_files.contenthash as image_hash'
+            )
+            ->orderBy('mdlhpdl_course.sortorder', 'desc')
+            ->get();
+
         $countries = config('countries');
-        return view('pages.auth.register', compact('countries'));
+        return view('pages.auth.register', compact('courses', 'countries'));
     }
 
     public function register(Request $request)
@@ -481,6 +501,7 @@ class HomePageController extends Controller
             'phone_primary'  => 'required|string|max:20|regex:/^[0-9+\-\s()]+$/', // simple phone validation
             'phone_secondary'=> 'nullable|string|max:20|regex:/^[0-9+\-\s()]+$/',
             'referred_by'    => 'nullable|string|max:20', // ensure the code exists
+            'course_interest' => 'nullable|string|max:255',
             'password'       => [
                 'required',
                 'min:8',
@@ -511,7 +532,7 @@ class HomePageController extends Controller
             'suspended'     => 0,
             'auth'          => 'manual',
             'phone1'        => $request->phone_primary,
-            'phone2'        => $request->phone_secondary,
+            'phone2'        => $request->phone_secondary ?? $request->phone_primary,
             'mnethostid'    => 1,
             'timecreated'   => $now,
             'timemodified'  => $now,
@@ -535,6 +556,7 @@ class HomePageController extends Controller
             'referred_by'     => $request->referred_by,   // code they used (if any)
             'phone_primary'   => $request->phone_primary,
             'phone_secondary' => $request->phone_secondary,
+            'course_interest' => $request->course_interest,
         ]);
 
         // Send welcome email (you can include the user's new referral code)

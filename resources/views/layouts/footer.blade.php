@@ -86,11 +86,11 @@
 
                         <div class="col-lg-3">
                             <div class="social-icon">
-                                <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-                                <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-                                <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-                                <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
-                                <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                                <a href="https://www.facebook.com/share/1CXWRb3eK6/" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                                <a href="https://www.instagram.com/bafai.ai?igsh=YWtteXlkbjd4Ymdj" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                                <a href="https://www.tiktok.com/@bafai_ai?_r=1&_t=ZS-96xEfdisjnE" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+                                <a href="https://youtube.com/@b.a.f.a.i?si=SYN6Jkdhb63yPF_Y" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                                <a href="https://www.linkedin.com/company/bafai-ai/" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
                             </div>
                         </div>
                     </div>

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\HomePageController;
 use Illuminate\Support\Facades\Route;
@@ -37,3 +38,35 @@ Route::post('/login', [HomePageController::class, 'authenticate'])->name('login.
 Route::get('/register', [HomePageController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [HomePageController::class, 'register'])->name('register.post');
 Route::post('/logout', [HomePageController::class, 'logout'])->name('logout');
+
+Route::prefix('admin')->name('admin.')->group(function () {
+
+    // Guest routes (login page)
+    Route::get('login', [AdminController::class, 'showLoginForm'])->name('login');
+    Route::post('login', [AdminController::class, 'login']);
+
+    // Protected routes
+    Route::middleware('admin.auth')->group(function () {
+        Route::get('dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+        Route::post('logout', [AdminController::class, 'logout'])->name('logout');
+
+        // Blog routes
+        Route::get('blogs', [AdminController::class, 'indexBlog'])->name('blogs.index');
+        Route::get('blogs/create', [AdminController::class, 'createBlog'])->name('blogs.create');
+        Route::post('blogs', [AdminController::class, 'storeBlog'])->name('blogs.store');
+        Route::get('blogs/{blog}/edit', [AdminController::class, 'editBlog'])->name('blogs.edit');
+        Route::put('blogs/{blog}', [AdminController::class, 'updateBlog'])->name('blogs.update');
+        Route::delete('blogs/{blog}', [AdminController::class, 'destroyBlog'])->name('blogs.destroy');
+
+        Route::get('users', [AdminController::class, 'users'])->name('users');
+        Route::get('users/export-csv', [AdminController::class, 'exportUsersCsv'])->name('users.export');
+
+        // Resources routes
+        Route::get('resources', [AdminController::class, 'indexResource'])->name('resources.index');
+        Route::get('resources/create', [AdminController::class, 'createResource'])->name('resources.create');
+        Route::post('resources', [AdminController::class, 'storeResource'])->name('resources.store');
+        Route::get('resources/{resource}/edit', [AdminController::class, 'editResource'])->name('resources.edit');
+        Route::put('resources/{resource}', [AdminController::class, 'updateResource'])->name('resources.update');
+        Route::delete('resources/{resource}', [AdminController::class, 'destroyResource'])->name('resources.destroy');
+    });
+});
