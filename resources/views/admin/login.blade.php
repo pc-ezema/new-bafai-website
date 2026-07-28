@@ -9,11 +9,23 @@
         body { background: linear-gradient(135deg, #503a98 0%, #21a37a 100%); height: 100vh; display: flex; align-items: center; justify-content: center; }
         .login-card { background: #fff; padding: 2rem; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); width: 100%; max-width: 400px; }
         .login-card h3 { font-weight: 600; }
+        img {
+            width: 100px;
+            display: flex;
+            margin: 0 auto;
+            margin-bottom: 1rem;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
     </style>
 </head>
 <body>
     <div class="login-card">
-        <h3 class="text-center mb-4"><i class="fas fa-shield-alt me-2"></i> Admin Login</h3>
+        <img src="{{ asset('assets/img/bafai-logo.png') }}" alt="BAFAI">  
+        <h3 class="text-center mb-4">
+            Admin Login
+        </h3>
 
         @if ($errors->any())
             <div class="alert alert-danger">{{ $errors->first() }}</div>
