@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\BlogPost;
+use App\Models\Discount;
 use App\Models\Resource;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -478,5 +479,73 @@ class AdminController extends Controller
 
         return redirect()->route('admin.resources.index')
                          ->with('success', 'Resource deleted successfully.');
+    }
+
+    public function indexDiscount()
+    {
+        $discounts = Discount::orderBy('created_at', 'desc')->get();
+        return view('admin.discounts.index', compact('discounts'));
+    }
+
+    public function createDiscount()
+    {
+        return view('admin.discounts.create');
+    }
+
+    public function storeDiscount(Request $request)
+    {
+        $validated = $request->validate([
+            'code'       => 'required|string|max:50|unique:discounts,code',
+            'type'       => 'required|in:percentage,fixed',
+            'value'      => 'required|numeric|min:0.01',
+            'max_uses'   => 'nullable|integer|min:1',
+            'expires_at' => 'nullable|date|after:now',
+            // 'is_active'  => 'boolean',
+        ], [
+            'code.required' => 'Discount code is required.',
+            'code.unique'   => 'This discount code already exists.',
+            'value.required'=> 'Discount value is required.',
+            'value.numeric' => 'Discount value must be a number.',
+            'expires_at.date' => 'Please enter a valid expiration date.',
+        ]);
+
+        $validated['is_active'] = $request->has('is_active');
+        Discount::create($validated);
+
+        return redirect()->route('admin.discounts.index')->with('success', 'Discount code created.');
+    }
+
+    public function editDiscount(Discount $discount)
+    {
+        return view('admin.discounts.edit', compact('discount'));
+    }
+
+    public function updateDiscount(Request $request, Discount $discount)
+    {
+        $validated = $request->validate([
+            'code'       => 'required|string|max:50|unique:discounts,code,' . $discount->id,
+            'type'       => 'required|in:percentage,fixed',
+            'value'      => 'required|numeric|min:0.01',
+            'max_uses'   => 'nullable|integer|min:1',
+            'expires_at' => 'nullable|date|after:now',
+            // 'is_active'  => 'boolean',
+        ], [
+            'code.required' => 'Discount code is required.',
+            'code.unique'   => 'This discount code already exists.',
+            'value.required'=> 'Discount value is required.',
+            'value.numeric' => 'Discount value must be a number.',
+            'expires_at.date' => 'Please enter a valid expiration date.',
+        ]);
+
+        $validated['is_active'] = $request->has('is_active');
+        $discount->update($validated);
+
+        return redirect()->route('admin.discounts.index')->with('success', 'Discount updated.');
+    }
+
+    public function destroyDiscount(Discount $discount)
+    {
+        $discount->delete();
+        return redirect()->route('admin.discounts.index')->with('success', 'Discount deleted.');
     }
 }

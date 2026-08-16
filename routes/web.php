@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\HomePageController;
+use App\Http\Controllers\PaystackController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomePageController::class, 'index'])->name('home');
@@ -28,7 +29,15 @@ Route::get('/cart-count', function () {
 Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 Route::middleware(['auth'])->group(function () {
     Route::post('/checkout', [CartController::class, 'process'])->name('checkout');
+    Route::get('/cart/process', [CartController::class, 'process'])->name('cart.process');
     Route::post('/cart/enroll', [CartController::class, 'enroll'])->name('cart.enroll');
+    Route::get('/cart/enroll', function () {
+        return redirect()->route('cart.index')->with('error', 'Invalid request. Please use the checkout process.');
+    })->name('cart.enroll.get');
+    // Paystack inline routes
+    Route::get('/paystack/verify/{reference}', [PaystackController::class, 'verify'])->name('paystack.verify');
+    Route::post('/cart/apply-discount', [CartController::class, 'applyDiscount'])->name('cart.apply-discount');
+    Route::post('/cart/remove-discount', [CartController::class, 'removeDiscount'])->name('cart.remove-discount');
 });
 Route::post('/sponsorship/apply', [HomePageController::class, 'storeSponsorshipApplication'])->name('sponsorship.apply');
 
@@ -68,5 +77,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('resources/{resource}/edit', [AdminController::class, 'editResource'])->name('resources.edit');
         Route::put('resources/{resource}', [AdminController::class, 'updateResource'])->name('resources.update');
         Route::delete('resources/{resource}', [AdminController::class, 'destroyResource'])->name('resources.destroy');
+
+        // Discounts routes
+        Route::get('discounts', [AdminController::class, 'indexDiscount'])->name('discounts.index');
+        Route::get('discounts/create', [AdminController::class, 'createDiscount'])->name('discounts.create');
+        Route::post('discounts', [AdminController::class, 'storeDiscount'])->name('discounts.store');
+        Route::get('discounts/{discount}/edit', [AdminController::class, 'editDiscount'])->name('discounts.edit');
+        Route::put('discounts/{discount}', [AdminController::class, 'updateDiscount'])->name('discounts.update');
+        Route::delete('discounts/{discount}', [AdminController::class, 'destroyDiscount'])->name('discounts.destroy');
     });
 });

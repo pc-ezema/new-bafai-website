@@ -228,6 +228,11 @@
                     <i class="fas fa-file-alt me-2"></i> Resources
                 </a>
             </li>
+            <li class="nav-item"></li>
+                <a class="nav-link" href="{{route('admin.discounts.index')}}">
+                    <i class="fas fa-tags me-2"></i> Discounts
+                </a>
+            </li>
             <li class="nav-item mt-4">
                 <form action="{{ route('admin.logout') }}" method="POST">
                     @csrf

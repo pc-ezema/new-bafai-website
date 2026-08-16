@@ -357,12 +357,15 @@ body {
                 <a href="{{ route('courses') }}" class="btn-continue">
                     <i class="fas fa-arrow-left me-2"></i> Continue Shopping
                 </a>
-                <form action="{{ route('checkout') }}" method="POST" style="flex:1">
+                <!-- <form action="{{ route('checkout') }}" method="POST" style="flex:1">
                     @csrf
                     <button type="submit" class="btn-enroll-now w-100">
                         <i class="fas fa-credit-card me-2"></i> Proceed to Checkout
                     </button>
-                </form>
+                </form> -->
+                <a href="{{ route('cart.process') }}" class="btn-enroll-now w-100">
+                    Proceed to Checkout <i class="fas fa-arrow-right ms-2"></i>
+                </a>
             </div>
         @else
             <div class="empty-cart">
