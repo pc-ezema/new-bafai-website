@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\EnrollmentConfirmationMail;
 use App\Models\Discount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class CartController extends Controller
@@ -99,21 +101,50 @@ class CartController extends Controller
             return redirect()->route('cart.index')->with('error', 'No matching Moodle account found. Please contact support.');
         }
 
+        // Get course details for the email
+        $courseIds = array_keys($cart);
+        $courses = DB::table('mdlhpdl_course')
+            ->whereIn('id', $courseIds)
+            ->select('id', 'fullname', 'shortname')
+            ->get();
+
         $errors = [];
-        foreach (array_keys($cart) as $courseId) {
+        $enrolledCourses = [];
+
+        foreach ($courseIds as $courseId) {
             if ($this->addUserToSiteCohort($moodleUser->id, $courseId)) {
-                // success
-                session()->forget('cart');
+                $enrolledCourses[] = $courseId;
             } else {
                 $errors[] = "Failed to enroll in course ID $courseId";
             }
         }
 
-        if (empty($errors)) {
-            return redirect()->route('cart.index')->with('success', 'You have been enrolled in all selected courses!');
-        } else {
+        // If at least one course was enrolled, clear cart and send email
+        if (!empty($enrolledCourses)) {
+            // Get the course objects for enrolled courses
+            $enrolledCourseDetails = $courses->filter(function($course) use ($enrolledCourses) {
+                return in_array($course->id, $enrolledCourses);
+            });
+
+            // Send confirmation email
+            try {
+                Mail::to($user->email)->send(new EnrollmentConfirmationMail($user, $enrolledCourseDetails, null));
+            } catch (\Exception $e) {
+                Log::error('Failed to send enrollment email: ' . $e->getMessage());
+            }
+
+            // Clear the cart
+            session()->forget('cart');
+
+            return redirect()->route('cart.index')
+                ->with('success', '🎉 You have been successfully enrolled! A confirmation email has been sent to your inbox.');
+        }
+
+        if (!empty($errors)) {
             return redirect()->route('cart.index')->with('errors', $errors);
         }
+
+        return redirect()->route('cart.index')->with('error', 'Something went wrong. Please contact support.');
     }
 
     /**

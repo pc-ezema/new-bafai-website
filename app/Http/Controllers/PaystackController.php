@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\EnrollmentConfirmationMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class PaystackController extends Controller
@@ -64,12 +66,20 @@ class PaystackController extends Controller
                     return redirect()->route('cart.index')->with('error', 'No matching Moodle account found. Please contact support.');
                 }
 
+                // Get course details for the email
+                $courseIds = array_keys($cart);
+                $courses = DB::table('mdlhpdl_course')
+                    ->whereIn('id', $courseIds)
+                    ->select('id', 'fullname', 'shortname')
+                    ->get();
+
                 $errors = [];
-                foreach (array_keys($cart) as $courseId) {
+                $enrolledCourses = [];
+
+                foreach ($courseIds as $courseId) {
                     $success = $this->addUserToSiteCohort($moodleUser->id, $courseId);
                     if ($success) {
-                        // Remove from cart after successful enrollment
-                        session()->forget('cart');
+                        $enrolledCourses[] = $courseId;
                     } else {
                         $errors[] = "Failed to enroll in course ID $courseId";
                     }
@@ -78,11 +88,31 @@ class PaystackController extends Controller
                 // Clear payment session data
                 session()->forget(['paystack_reference', 'paystack_cart', 'paystack_amount']);
 
-                if (empty($errors)) {
-                    return redirect()->route('cart.index')->with('success', 'Payment successful! You are now enrolled.');
-                } else {
+                // If at least one course was enrolled, send confirmation email
+                if (!empty($enrolledCourses)) {
+                    // Get the course objects for enrolled courses
+                    $enrolledCourseDetails = $courses->filter(function($course) use ($enrolledCourses) {
+                        return in_array($course->id, $enrolledCourses);
+                    });
+
+                    try {
+                        Mail::to($user->email)->send(new EnrollmentConfirmationMail($user, $enrolledCourseDetails, null));
+                    } catch (\Exception $e) {
+                        Log::error('Failed to send enrollment email: ' . $e->getMessage());
+                    }
+
+                    // Clear the cart
+                    session()->forget('cart');
+
+                    return redirect()->route('cart.index')
+                        ->with('success', '🎉 Payment successful! You are now enrolled. A confirmation email has been sent to your inbox.');
+                }
+
+                if (!empty($errors)) {
                     return redirect()->route('cart.index')->with('errors', $errors);
                 }
+
+                return redirect()->route('cart.index')->with('error', 'Something went wrong. Please contact support.');
             }
         }
 
