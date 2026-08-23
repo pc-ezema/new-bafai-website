@@ -233,6 +233,11 @@
                     <i class="fas fa-tags me-2"></i> Discounts
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('admin.course-prices.index') }}">
+                    <i class="fas fa-tags me-2"></i> Course Prices
+                </a>
+            </li>
             <li class="nav-item mt-4">
                 <form action="{{ route('admin.logout') }}" method="POST">
                     @csrf

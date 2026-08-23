@@ -25,25 +25,39 @@ class CartController extends Controller
         if (!empty($cart)) {
             $courseIds = array_keys($cart);
 
-            // Fetch course details
             $courses = DB::table('mdlhpdl_course')
-                ->whereIn('id', $courseIds)
-                ->select('id', 'fullname', 'summary', 'category')
+                ->whereIn('mdlhpdl_course.id', $courseIds) // 🔥 Specify table
+                ->leftJoin('mdlhpdl_enrol', function ($join) {
+                    $join->on('mdlhpdl_enrol.courseid', '=', 'mdlhpdl_course.id')
+                        ->where('mdlhpdl_enrol.enrol', '=', 'fee')
+                        ->where('mdlhpdl_enrol.status', '=', 1);
+                })
+                ->leftJoin('course_prices', 'mdlhpdl_course.id', '=', 'course_prices.course_id')
+                ->select(
+                    'mdlhpdl_course.id',
+                    'mdlhpdl_course.fullname',
+                    'mdlhpdl_course.summary',
+                    'mdlhpdl_course.category',
+                    'mdlhpdl_enrol.cost as enrol_price',
+                    'course_prices.original_price',
+                    'course_prices.discounted_price',
+                    'course_prices.currency as price_currency',
+                    'course_prices.discount_ends_at'
+                )
                 ->get();
 
-            // 🔽 Fetch ALL enrolments for these courses in ONE query (efficient!)
-            $enrolments = DB::table('mdlhpdl_enrol')
-                ->whereIn('courseid', $courseIds)
-                ->where('enrol', 'fee') // Change to 'stripe' if needed
-                ->where('status', 1)
-                ->get()
-                ->keyBy('courseid'); // Key the collection by course ID for easy lookup
-
-            // Attach price & currency to each course
+            // Attach effective price
             foreach ($courses as $course) {
-                $enrol = $enrolments->get($course->id);
-                $course->price = $enrol ? floatval($enrol->cost) : 0;
-                $course->currency = $enrol ? $enrol->currency : 'USD';
+                $enrolPrice = $course->enrol_price ?? 0;
+                $originalPrice = $course->original_price ?? $enrolPrice;
+                $discountedPrice = $course->discounted_price ?? null;
+                $hasDiscount = !is_null($discountedPrice) && $discountedPrice > 0 && $discountedPrice < $originalPrice;
+                if ($hasDiscount && $course->discount_ends_at && \Carbon\Carbon::now()->gt(\Carbon\Carbon::parse($course->discount_ends_at))) {
+                    $hasDiscount = false;
+                    $discountedPrice = null;
+                }
+                $course->price = $hasDiscount ? $discountedPrice : $originalPrice;
+                $course->currency = $course->price_currency ?? 'USD';
                 $total += $course->price;
             }
         }
@@ -237,20 +251,44 @@ class CartController extends Controller
             return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
         }
 
-        // Fetch courses and prices
         $courseIds = array_keys($cart);
-        $courses = DB::table('mdlhpdl_course')->whereIn('id', $courseIds)->get();
-        $enrolments = DB::table('mdlhpdl_enrol')
-            ->whereIn('courseid', $courseIds)
-            ->where('enrol', 'fee')
-            ->where('status', 1)
-            ->get()
-            ->keyBy('courseid');
 
+        $courses = DB::table('mdlhpdl_course')
+            ->whereIn('mdlhpdl_course.id', $courseIds) // 🔥 Fixed
+            ->leftJoin('mdlhpdl_enrol', function ($join) {
+                $join->on('mdlhpdl_enrol.courseid', '=', 'mdlhpdl_course.id')
+                    ->where('mdlhpdl_enrol.enrol', '=', 'fee')
+                    ->where('mdlhpdl_enrol.status', '=', 1);
+            })
+            ->leftJoin('course_prices', 'mdlhpdl_course.id', '=', 'course_prices.course_id')
+            ->select(
+                'mdlhpdl_course.id',
+                'mdlhpdl_course.fullname',
+                'mdlhpdl_course.summary',
+                'mdlhpdl_enrol.cost as enrol_price',
+                'mdlhpdl_enrol.currency as enrol_currency',
+                'course_prices.original_price',
+                'course_prices.discounted_price',
+                'course_prices.currency as price_currency',
+                'course_prices.discount_ends_at'
+            )
+            ->get();
+
+        // Calculate effective price for each course
         $totalUSD = 0;
         foreach ($courses as $course) {
-            $enrol = $enrolments->get($course->id);
-            $course->price = $enrol ? floatval($enrol->cost) : 0;
+            $enrolPrice = $course->enrol_price ?? 0;
+            $originalPrice = $course->original_price ?? $enrolPrice;
+            $discountedPrice = $course->discounted_price ?? null;
+
+            $hasDiscount = !is_null($discountedPrice) && $discountedPrice > 0 && $discountedPrice < $originalPrice;
+            if ($hasDiscount && $course->discount_ends_at && \Carbon\Carbon::now()->gt(\Carbon\Carbon::parse($course->discount_ends_at))) {
+                $hasDiscount = false;
+                $discountedPrice = null;
+            }
+
+            $course->price = $hasDiscount ? $discountedPrice : $originalPrice;
+            $course->currency = $course->price_currency ?? $course->enrol_currency ?? 'USD';
             $totalUSD += $course->price;
         }
 
@@ -259,7 +297,7 @@ class CartController extends Controller
             return view('pages.cart.free-checkout', compact('courses'));
         }
 
-        // Check for discount – apply in USD first
+        // Check for discount code (applied on total, not per course)
         $discountCode = session()->get('discount_code');
         $discount = null;
         $discountAmountUSD = 0;
@@ -268,14 +306,14 @@ class CartController extends Controller
         if ($discountCode) {
             $discount = Discount::where('code', $discountCode)->first();
             if ($discount && $discount->isValid()) {
-                $finalUSD = $discount->applyTo($totalUSD);          // discounted total
-                $discountAmountUSD = $totalUSD - $finalUSD;        // discount in USD
+                $finalUSD = $discount->applyTo($totalUSD);
+                $discountAmountUSD = $totalUSD - $finalUSD;
             } else {
                 session()->forget('discount_code');
             }
         }
 
-        // 🔽 Now compute NGN and Stripe using the FINAL USD amount
+        // Compute NGN and Stripe using the FINAL USD amount
         $paystack = new PaystackController();
         $rate = $paystack->getExchangeRate();
 
@@ -293,8 +331,8 @@ class CartController extends Controller
 
         return view('pages.cart.checkout', compact(
             'courses',
-            'totalUSD',                // original subtotal (for display)
-            'finalUSD',                // discounted total (for payments)
+            'totalUSD',
+            'finalUSD',
             'discountAmountUSD',
             'discountAmountNaira',
             'totalNaira',

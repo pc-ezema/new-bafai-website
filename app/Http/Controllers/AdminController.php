@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\BlogPost;
+use App\Models\CoursePrice;
 use App\Models\Discount;
 use App\Models\Resource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
@@ -547,5 +549,89 @@ class AdminController extends Controller
     {
         $discount->delete();
         return redirect()->route('admin.discounts.index')->with('success', 'Discount deleted.');
+    }
+
+    public function indexCoursePrice()
+    {
+        $courses = DB::table('mdlhpdl_course')
+            ->where('mdlhpdl_course.id', '>', 1)
+            ->leftJoin('course_prices', 'mdlhpdl_course.id', '=', 'course_prices.course_id')
+            ->select(
+                'mdlhpdl_course.id',
+                'mdlhpdl_course.fullname',
+                'course_prices.original_price',
+                'course_prices.discounted_price',
+                'course_prices.currency',
+                'course_prices.discount_ends_at'
+            )
+            ->orderBy('mdlhpdl_course.fullname')
+            ->get();
+
+        return view('admin.course-prices.index', compact('courses'));
+    }
+
+    public function editCoursePrice($courseId)
+    {
+        $course = DB::table('mdlhpdl_course')
+            ->where('id', $courseId)
+            ->select('id', 'fullname')
+            ->first();
+
+        if (!$course) {
+            return redirect()->route('admin.course-prices.index')
+                ->with('error', 'Course not found.');
+        }
+
+        $price = CoursePrice::where('course_id', $courseId)->first();
+
+        // If no price record, create a new instance with default values
+        if (!$price) {
+            $price = new CoursePrice();
+            $price->original_price = null;
+            $price->discounted_price = null;
+            $price->currency = 'USD';
+            $price->discount_ends_at = null;
+        }
+
+        return view('admin.course-prices.edit', compact('course', 'price'));
+
+    }
+
+    public function updateCoursePrice(Request $request, $courseId)
+    {
+        $validated = $request->validate([
+            'original_price'   => 'nullable|numeric|min:0',
+            'discounted_price' => 'nullable|numeric|min:0|lt:original_price',
+            'currency'         => 'required|string|size:3',
+            'discount_ends_at' => 'nullable|date|after:now',
+        ], [
+            'discounted_price.lt' => 'The discounted price must be less than the original price.',
+        ]);
+
+        $courseExists = DB::table('mdlhpdl_course')->where('id', $courseId)->exists();
+        if (!$courseExists) {
+            return redirect()->route('admin.course-prices.index')
+                ->with('error', 'Course not found.');
+        }
+
+        CoursePrice::updateOrCreate(
+            ['course_id' => $courseId],
+            [
+                'original_price'   => $validated['original_price'] ?? null,
+                'discounted_price' => $validated['discounted_price'] ?? null,
+                'currency'         => $validated['currency'],
+                'discount_ends_at' => $validated['discount_ends_at'] ?? null,
+            ]
+        );
+
+        return redirect()->route('admin.course-prices.index')
+            ->with('success', 'Price updated successfully.');
+    }
+
+    public function destroyCoursePrice($courseId)
+    {
+        CoursePrice::where('course_id', $courseId)->delete();
+        return redirect()->route('admin.course-prices.index')
+            ->with('success', 'Price record deleted.');
     }
 }

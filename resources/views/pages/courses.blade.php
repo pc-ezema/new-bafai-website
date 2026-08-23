@@ -222,26 +222,60 @@ body { font-size: 15px; line-height: 1.5; background: var(--gray-light); }
     color: #fbbf24;
     margin-bottom: 0.5rem;
 }
+/* 🟢 Refined Price Styling */
 .course-price {
-    font-weight: 800;
-    color: var(--primary);
-    font-size: 1.1rem;
-    margin-top: auto;
-    padding-top: 0.8rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: auto;
+    padding-top: 0.8rem;
+    border-top: 1px solid #e9ecef;
+}
+.price-display {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.3;
+}
+.price-original {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    text-decoration: line-through;
+    margin-bottom: 0.1rem;
+}
+.price-discounted {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--secondary);
+}
+.price-single {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+.save-badge {
+    font-size: 0.65rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 20px;
+    background: #dc3545;
+    color: white;
+    font-weight: 600;
+    margin-left: 0.5rem;
+    vertical-align: middle;
 }
 .btn-enroll {
+    flex-shrink: 0;
     background: linear-gradient(135deg, var(--primary), var(--primary-dark));
     color: white;
     border: none;
     padding: 0.4rem 1rem;
     border-radius: 2rem;
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     font-weight: 600;
     transition: all 0.2s;
     text-decoration: none;
+    white-space: nowrap;
 }
 .btn-enroll:hover {
     transform: scale(1.02);
@@ -393,27 +427,43 @@ body { font-size: 15px; line-height: 1.5; background: var(--gray-light); }
                             <div class="course-rating">
                                 <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i> 4.8
                             </div>
+
+                            <!-- 🟢 PRICE BLOCK -->
                             <div class="course-price">
                                 @php
-                                    // Fetch the actual price from the enrolment plugin
-                                    $enrolment = DB::table('mdlhpdl_enrol')
-                                        ->where('courseid', $course->id)
-                                        ->where('enrol', 'fee') // or 'stripe'
-                                        ->where('status', 1)
-                                        ->first();
-
-                                    $price = $enrolment ? floatval($enrolment->cost) : 0;
-                                    $currency = $enrolment ? $enrolment->currency : 'USD';
+                                    $enrolPrice = $course->enrol_price ?? 0;
+                                    $originalPrice = $course->original_price ?? $enrolPrice;
+                                    $discountedPrice = $course->discounted_price ?? null;
+                                    $hasDiscount = !is_null($discountedPrice) && $discountedPrice > 0 && $discountedPrice < $originalPrice;
+                                    if ($hasDiscount && $course->discount_ends_at && \Carbon\Carbon::now()->gt(\Carbon\Carbon::parse($course->discount_ends_at))) {
+                                        $hasDiscount = false;
+                                        $discountedPrice = null;
+                                    }
+                                    $finalPrice = $hasDiscount ? $discountedPrice : $originalPrice;
+                                    $currency = $course->price_currency ?? $course->enrol_currency ?? 'USD';
+                                    $savingsPercent = $hasDiscount ? round((($originalPrice - $discountedPrice) / $originalPrice) * 100) : 0;
                                 @endphp
-                                @if($price > 0)
-                                    {{ $currency }} {{ number_format($price, 2) }}
-                                @else
-                                    Free
-                                @endif
+                                <div class="price-display">
+                                    @if($hasDiscount)
+                                        <span class="price-original">
+                                            {{ $currency }} {{ number_format($originalPrice, 2) }}
+                                        </span>
+                                        <span class="price-discounted">
+                                            {{ $currency }} {{ number_format($finalPrice, 2) }}
+                                            <span class="badge bg-danger save-badge">Save {{ $savingsPercent }}%</span>
+                                        </span>
+                                    @else
+                                        <span class="price-single">
+                                            {{ $currency }} {{ number_format($finalPrice, 2) }}
+                                        </span>
+                                    @endif
+                                </div>
                                 <a href="{{ route('course-details', $course->id) }}" class="btn-enroll">
                                     View Details <i class="fas fa-arrow-right ms-1"></i>
                                 </a>
                             </div>
+                            <!-- END PRICE BLOCK -->
+
                         </div>
                     </div>
                     @empty
@@ -444,7 +494,7 @@ body { font-size: 15px; line-height: 1.5; background: var(--gray-light); }
         offset: 100,
         easing: 'ease-out-quad'
     });
-    // Simple filter placeholder (can be extended)
+    // Simple filter placeholder
     $('.btn-filter').on('click', function() {
         alert('Filter functionality can be implemented with AJAX or backend logic.');
     });

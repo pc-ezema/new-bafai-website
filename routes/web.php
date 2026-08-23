@@ -85,5 +85,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('discounts/{discount}/edit', [AdminController::class, 'editDiscount'])->name('discounts.edit');
         Route::put('discounts/{discount}', [AdminController::class, 'updateDiscount'])->name('discounts.update');
         Route::delete('discounts/{discount}', [AdminController::class, 'destroyDiscount'])->name('discounts.destroy');
+
+        Route::get('course-prices', [AdminController::class, 'indexCoursePrice'])->name('course-prices.index');
+        Route::get('course-prices/{courseId}/edit', [AdminController::class, 'editCoursePrice'])->name('course-prices.edit');
+        Route::put('course-prices/{courseId}', [AdminController::class, 'updateCoursePrice'])->name('course-prices.update');
+        Route::delete('course-prices/{courseId}', [AdminController::class, 'destroyCoursePrice'])->name('course-prices.destroy');
     });
 });

@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -116,28 +117,61 @@ class HomePageController extends Controller
             ->limit(6)
             ->get();
 
-        // 3. 🔽 COLLECT ALL COURSE IDs FROM BOTH COLLECTIONS
+        // 3. Collect all course IDs from both collections
         $allCourseIds = $featuredCourses->pluck('id')->merge($topCourses->pluck('id'))->unique()->toArray();
 
-        // 4. 🔽 FETCH ALL PRICES IN ONE SINGLE QUERY
+        // 4. Fetch enrolment prices (fallback)
         $enrolments = DB::table('mdlhpdl_enrol')
             ->whereIn('courseid', $allCourseIds)
-            ->where('enrol', 'fee') // Change to 'stripe' if needed
+            ->where('enrol', 'fee')
             ->where('status', 1)
             ->get()
-            ->keyBy('courseid'); // Key by course ID for fast lookup
+            ->keyBy('courseid');
 
-        // 5. 🔽 ATTACH PRICES TO BOTH COLLECTIONS
+        // 5. Fetch custom prices from course_prices
+        $coursePrices = DB::table('course_prices')
+            ->whereIn('course_id', $allCourseIds)
+            ->get()
+            ->keyBy('course_id');
+
+        // 6. Attach full price data to featured courses
         foreach ($featuredCourses as $course) {
             $enrol = $enrolments->get($course->id);
-            $course->price = $enrol ? floatval($enrol->cost) : 0;
-            $course->currency = $enrol ? $enrol->currency : 'USD';
+            $priceRow = $coursePrices->get($course->id);
+
+            $enrolPrice = $enrol ? floatval($enrol->cost) : 0;
+            $course->original_price = $priceRow->original_price ?? $enrolPrice;
+            $course->discounted_price = $priceRow->discounted_price ?? null;
+            $course->currency = $priceRow->currency ?? $enrol->currency ?? 'USD';
+            $course->has_discount = !is_null($course->discounted_price) 
+                                && $course->discounted_price > 0 
+                                && $course->discounted_price < $course->original_price;
+            if ($course->has_discount && $priceRow && $priceRow->discount_ends_at && \Carbon\Carbon::now()->gt(\Carbon\Carbon::parse($priceRow->discount_ends_at))) {
+                $course->has_discount = false;
+                $course->discounted_price = null;
+            }
+            $course->price = $course->has_discount ? $course->discounted_price : $course->original_price;
+            $course->savings_percent = $course->has_discount ? round((($course->original_price - $course->discounted_price) / $course->original_price) * 100) : 0;
         }
 
+        // 7. Attach full price data to top courses
         foreach ($topCourses as $course) {
             $enrol = $enrolments->get($course->id);
-            $course->price = $enrol ? floatval($enrol->cost) : 0;
-            $course->currency = $enrol ? $enrol->currency : 'USD';
+            $priceRow = $coursePrices->get($course->id);
+
+            $enrolPrice = $enrol ? floatval($enrol->cost) : 0;
+            $course->original_price = $priceRow->original_price ?? $enrolPrice;
+            $course->discounted_price = $priceRow->discounted_price ?? null;
+            $course->currency = $priceRow->currency ?? $enrol->currency ?? 'USD';
+            $course->has_discount = !is_null($course->discounted_price) 
+                                && $course->discounted_price > 0 
+                                && $course->discounted_price < $course->original_price;
+            if ($course->has_discount && $priceRow && $priceRow->discount_ends_at && \Carbon\Carbon::now()->gt(\Carbon\Carbon::parse($priceRow->discount_ends_at))) {
+                $course->has_discount = false;
+                $course->discounted_price = null;
+            }
+            $course->price = $course->has_discount ? $course->discounted_price : $course->original_price;
+            $course->savings_percent = $course->has_discount ? round((($course->original_price - $course->discounted_price) / $course->original_price) * 100) : 0;
         }
 
         return view('pages.index', compact('featuredCourses', 'topCourses'));
@@ -210,9 +244,8 @@ class HomePageController extends Controller
     {
         $selectedCategory = $request->input('category');
 
-        // Build the base query – joining the enrol table to get the price
         $query = Course::visible()
-            ->where('mdlhpdl_course.id', '>', 1) // exclude site course
+            ->where('mdlhpdl_course.id', '>', 1)
             ->leftJoin('mdlhpdl_course_categories', 'mdlhpdl_course.category', '=', 'mdlhpdl_course_categories.id')
             ->leftJoin('mdlhpdl_context', function ($join) {
                 $join->on('mdlhpdl_context.instanceid', '=', 'mdlhpdl_course.id')
@@ -236,27 +269,29 @@ class HomePageController extends Controller
                     ->where('mdlhpdl_enrol.enrol', '=', 'fee')
                     ->where('mdlhpdl_enrol.status', '=', 1);
             })
+            ->leftJoin('course_prices', 'mdlhpdl_course.id', '=', 'course_prices.course_id')
             ->select(
                 'mdlhpdl_course.*',
                 'mdlhpdl_course_categories.name as category_name',
                 'mdlhpdl_context.id as context_id',
                 'mdlhpdl_files.filename as image_filename',
                 'mdlhpdl_files.contenthash as image_hash',
-                'mdlhpdl_enrol.cost as price',
-                'mdlhpdl_enrol.currency as currency'
+                'mdlhpdl_enrol.cost as enrol_price',
+                'mdlhpdl_enrol.currency as enrol_currency',
+                'course_prices.original_price',
+                'course_prices.discounted_price',
+                'course_prices.currency as price_currency',
+                'course_prices.discount_ends_at'
             );
 
-        // Apply category filter
         if ($selectedCategory && is_numeric($selectedCategory)) {
             $query->where('mdlhpdl_course.category', $selectedCategory);
         }
 
-        // Fetch directly from the database (no cache)
         $courses = $query->orderBy('mdlhpdl_course.sortorder', 'desc')
                         ->orderBy('mdlhpdl_course.id', 'desc')
                         ->paginate(9);
 
-        // Get categories for the sidebar filter
         $categories = CourseCategory::where('visible', 1)
             ->orderBy('sortorder')
             ->get();
@@ -269,7 +304,7 @@ class HomePageController extends Controller
      */
     public function courseDetails($id)
     {
-        // Main course query
+        // Main course query – JOIN course_prices
         $course = Course::visible()
             ->where('mdlhpdl_course.id', $id)
             ->leftJoin('mdlhpdl_course_categories', 'mdlhpdl_course.category', '=', 'mdlhpdl_course_categories.id')
@@ -288,20 +323,39 @@ class HomePageController extends Controller
                     ->where('mdlhpdl_enrol.enrol', '=', 'fee')
                     ->where('mdlhpdl_enrol.status', '=', 1);
             })
+            ->leftJoin('course_prices', 'mdlhpdl_course.id', '=', 'course_prices.course_id')
             ->select(
                 'mdlhpdl_course.*',
                 'mdlhpdl_course_categories.name as category_name',
                 'mdlhpdl_context.id as context_id',
                 'mdlhpdl_files.filename as image_filename',
                 'mdlhpdl_files.contenthash as image_hash',
-                'mdlhpdl_enrol.cost as price',
-                'mdlhpdl_enrol.currency as currency'
+                'mdlhpdl_enrol.cost as enrol_price',
+                'mdlhpdl_enrol.currency as enrol_currency',
+                'course_prices.original_price',
+                'course_prices.discounted_price',
+                'course_prices.currency as price_currency',
+                'course_prices.discount_ends_at'
             )
             ->first();
 
         if (!$course) {
             abort(404, 'Course not found');
         }
+
+        // --- Price calculation (same as listing) ---
+        $enrolPrice = $course->enrol_price ?? 0;
+        $originalPrice = $course->original_price ?? $enrolPrice;
+        $discountedPrice = $course->discounted_price ?? null;
+        $hasDiscount = !is_null($discountedPrice) && $discountedPrice > 0 && $discountedPrice < $originalPrice;
+        if ($hasDiscount && $course->discount_ends_at && \Carbon\Carbon::now()->gt(\Carbon\Carbon::parse($course->discount_ends_at))) {
+            $hasDiscount = false;
+            $discountedPrice = null;
+        }
+        $finalPrice = $hasDiscount ? $discountedPrice : $originalPrice;
+        $currency = $course->price_currency ?? $course->enrol_currency ?? 'USD';
+        $savingsPercent = $hasDiscount ? round((($originalPrice - $discountedPrice) / $originalPrice) * 100) : 0;
+        // -------------------------------------------------
 
         // Instructor
         $instructor = null;
@@ -326,32 +380,26 @@ class HomePageController extends Controller
         // Ratings
         $avgRating = 4.8;
         $ratingCount = 245;
-
         try {
             $avgRating = DB::table('mdlhpdl_rating')
                 ->where('contextid', $course->context_id)
                 ->where('ratingarea', 'course')
                 ->avg('rating');
-
             $ratingCount = DB::table('mdlhpdl_rating')
                 ->where('contextid', $course->context_id)
                 ->where('ratingarea', 'course')
                 ->count();
-
             $avgRating = $avgRating ? round($avgRating, 1) : 4.8;
             $ratingCount = $ratingCount ?: 245;
         } catch (\Exception $e) {
-            // Keep default values
+            // keep defaults
         }
 
         // Enrollment URL
         $moodleUrl = config('app.moodle_base_url', 'https://your-moodle.com');
         $enrollUrl = $moodleUrl . '/course/view.php?id=' . $course->id;
 
-        $price = $course->price ? (float) $course->price : 0;
-        $currency = $course->currency ?? 'USD';
-
-        // Cart check (always fresh)
+        // Cart check
         $cart = session()->get('cart', []);
         $inCart = isset($cart[$course->id]);
 
@@ -362,8 +410,11 @@ class HomePageController extends Controller
             'avgRating',
             'ratingCount',
             'enrollUrl',
-            'price',
+            'finalPrice',
+            'originalPrice',
+            'hasDiscount',
             'currency',
+            'savingsPercent',
             'inCart'
         ));
     }

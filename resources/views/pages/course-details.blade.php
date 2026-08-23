@@ -276,7 +276,19 @@ body {
                                 {{ $avgRating }} ({{ $ratingCount }} ratings)
                             </span>
                         </div>
-                        <div class="course-price d-lg-none">${{ $price }}</div>
+                        <div class="course-price d-lg-none">
+                            @if($hasDiscount)
+                                <span class="text-muted text-decoration-line-through me-2">
+                                    {{ $currency }} {{ number_format($originalPrice, 2) }}
+                                </span>
+                                <span class="text-success fw-bold">
+                                    {{ $currency }} {{ number_format($finalPrice, 2) }}
+                                    <span class="badge bg-danger">Save {{ $savingsPercent }}%</span>
+                                </span>
+                            @else
+                                <span class="fw-bold">{{ $currency }} {{ number_format($finalPrice, 2) }}</span>
+                            @endif
+                        </div>
                     </div>
                     <div class="course-description">
                         <h3>About This Course</h3>
@@ -337,10 +349,22 @@ body {
             <div class="col-lg-4">
                 <div class="sidebar-card">
                     <img src="{{ $imageUrl }}" class="img-fluid rounded mb-3" alt="{{ $course->fullname }}">
-                    @if($price > 0)
-                        <div class="course-price">{{ $currency }} {{ number_format($price, 2) }}</div>
+                    @if($finalPrice > 0)
+                        <div class="course-price">
+                            @if($hasDiscount)
+                                <span class="text-muted text-decoration-line-through small d-block">
+                                    {{ $currency }} {{ number_format($originalPrice, 2) }}
+                                </span>
+                                <span class="text-success fw-bold fs-3">
+                                    {{ $currency }} {{ number_format($finalPrice, 2) }}
+                                    <span class="badge bg-danger fs-6">Save {{ $savingsPercent }}%</span>
+                                </span>
+                            @else
+                                <span class="fw-bold fs-3">{{ $currency }} {{ number_format($finalPrice, 2) }}</span>
+                            @endif
+                        </div>
                     @else
-                        <div class="free-badge">Free</div>
+                        <div class="free-badge text-success fw-bold fs-3">Free</div>
                     @endif
                     @if($inCart)
                         <a href="{{ route('cart.index') }}" class="btn-enroll w-100">

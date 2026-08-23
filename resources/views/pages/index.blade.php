@@ -49,32 +49,37 @@
                         <div class="swiper-wrapper">
                             @foreach($topCourses as $course)
                                 @php
-                                    // Image URL (keep this as is)
-                                    if($course->image_hash && $course->image_filename) {
-                                        $imageUrl = route('moodle.file', [
-                                            'hash' => $course->image_hash,
-                                            'filename' => $course->image_filename
-                                        ]);
-                                    } else {
-                                        $imageUrl = asset('assets/img/course-placeholder.jpg');
-                                    }
+                                    $imageUrl = ($course->image_hash && $course->image_filename) 
+                                        ? route('moodle.file', ['hash' => $course->image_hash, 'filename' => $course->image_filename])
+                                        : asset('assets/img/course-placeholder.jpg');
                                 @endphp
                                 <div class="swiper-slide">
                                     <div class="mini-course-card">
                                         <div class="mini-course-img">
                                             <img src="{{ $imageUrl }}" alt="{{ $course->fullname }}">
+                                            @if($course->has_discount)
+                                                <span class="discount-badge">-{{ $course->savings_percent }}%</span>
+                                            @endif
                                         </div>
                                         <div class="mini-course-content">
                                             <h6 class="mini-course-title">{{ Str::limit($course->fullname, 40) }}</h6>
-                                            <div class="d-flex justify-content-between">
-                                                {{-- 🟢 DYNAMIC PRICE FROM CONTROLLER --}}
-                                                <span class="mini-course-price">
-                                                    @if($course->price > 0)
-                                                        {{ $course->currency }} {{ number_format($course->price, 2) }}
+                                            <div class="mini-course-price-wrap">
+                                                <div class="price-display">
+                                                    @if($course->has_discount)
+                                                        <span class="original-price small text-muted text-decoration-line-through">
+                                                            {{ $course->currency }} {{ number_format($course->original_price, 2) }}
+                                                        </span>
+                                                        <span class="discounted-price fw-bold text-success">
+                                                            {{ $course->currency }} {{ number_format($course->price, 2) }}
+                                                        </span>
+                                                    @elseif($course->price > 0)
+                                                        <span class="regular-price-grid fw-bold">
+                                                            {{ $course->currency }} {{ number_format($course->price, 2) }}
+                                                        </span>
                                                     @else
-                                                        Free
+                                                        <span class="regular-price-grid fw-bold text-success">Free</span>
                                                     @endif
-                                                </span>
+                                                </div>
                                                 <a href="{{ route('course-details', $course->id) }}" class="btn btn-sm-custom">
                                                     View Details
                                                 </a>
@@ -174,7 +179,7 @@
         <div class="row g-4">
             @foreach($featuredCourses as $key => $course)
                 @php
-                    // Build image URL (keep this as is)
+                    // Build image URL
                     if($course->image_hash && $course->image_filename) {
                         $imageUrl = route('moodle.file', [
                             'hash' => $course->image_hash,
@@ -188,19 +193,30 @@
                     <div class="course-card">
                         <div class="course-img">
                             <img src="{{ $imageUrl }}" alt="{{ $course->fullname }}">
+                            @if($course->has_discount)
+                                <span class="discount-badge-grid">-{{ $course->savings_percent }}%</span>
+                            @endif
                         </div>
                         <div class="course-content">
                             <h5 class="course-title">{{ Str::limit($course->fullname, 50) }}</h5>
                             <p class="text-muted small">{{ Str::limit(strip_tags($course->summary), 100) }}</p>
                             <div class="d-flex justify-content-between align-items-center">
-                                {{-- 🟢 DYNAMIC PRICE FROM CONTROLLER --}}
-                                <span class="course-price">
-                                    @if($course->price > 0)
-                                        {{ $course->currency }} {{ number_format($course->price, 2) }}
+                                <div class="price-display-grid">
+                                    @if($course->has_discount)
+                                        <span class="original-price-grid text-muted text-decoration-line-through">
+                                            {{ $course->currency }} {{ number_format($course->original_price, 2) }}
+                                        </span>
+                                        <span class="discounted-price-grid text-success fw-bold">
+                                            {{ $course->currency }} {{ number_format($course->price, 2) }}
+                                        </span>
+                                    @elseif($course->price > 0)
+                                        <span class="regular-price-grid fw-bold">
+                                            {{ $course->currency }} {{ number_format($course->price, 2) }}
+                                        </span>
                                     @else
-                                        Free
+                                        <span class="regular-price-grid fw-bold text-success">Free</span>
                                     @endif
-                                </span>
+                                </div>
                                 <a href="{{ route('course-details', $course->id) }}" class="btn btn-outline-primary-custom">
                                     View Details <i class="fas fa-arrow-right ms-2"></i>
                                 </a>
@@ -215,6 +231,7 @@
         </div>
     </div>
 </section>
+
 <!-- Get Started Section -->
 <section class="get-started-section">
     <div class="container">
