@@ -10,6 +10,8 @@
     <meta name="author" content="BAFAI">
     <title>@yield('title', 'BAFAI - Advanced Learning Management System')</title>
 
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <!-- Favicon -->
     <link rel="shortcut icon" href="{{ asset('assets/img/favicon.png') }}">
 

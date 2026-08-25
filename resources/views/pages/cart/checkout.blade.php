@@ -360,8 +360,8 @@ body {
                 fetch('{{ route("cart.apply-discount") }}', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ code: code })
                 })
@@ -384,13 +384,14 @@ body {
             removeBtn.addEventListener('click', function() {
                 fetch('{{ route("cart.remove-discount") }}', {
                     method: 'POST',
-                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
                 })
                 .then(() => window.location.reload());
             });
         }
-    });
-    document.addEventListener('DOMContentLoaded', function() {
+
         // Paystack
         const paystackBtn = document.getElementById('paystackBtn');
         if (paystackBtn) {
